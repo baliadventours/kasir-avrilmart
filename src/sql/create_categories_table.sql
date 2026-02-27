@@ -1,5 +1,5 @@
 -- SQL Migration for Categories Table
--- Run this FOURTH after users table (categories is independent)
+-- Run this in Supabase SQL Editor
 
 -- Create categories table
 CREATE TABLE IF NOT EXISTS categories (
