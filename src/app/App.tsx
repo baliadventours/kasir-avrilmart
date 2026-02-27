@@ -8,6 +8,7 @@ import { CategoryManager } from "./components/category-manager";
 import { Sidebar } from "./components/sidebar";
 import { Reports } from "./components/reports";
 import { OfflineIndicator } from "./components/offline-indicator";
+import { PWAPrompt } from "./components/pwa-prompt";
 import { Product, CartItem, Sale } from "./types";
 import { productsAPI, salesAPI, authAPI } from "../services/supabase";
 import { dbToFrontendProduct, frontendToDbProduct } from "../utils/helpers";
@@ -402,6 +403,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white flex">
+      {/* PWA Prompt */}
+      <PWAPrompt />
+
       {/* Offline Indicator */}
       <OfflineIndicator
         isOnline={offlineSync.isOnline}
