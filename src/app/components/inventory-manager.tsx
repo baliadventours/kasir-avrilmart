@@ -86,26 +86,28 @@ export function InventoryManager({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Inventory Management</h2>
-          <p className="text-gray-500">Manage your products and stock levels</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowCSVImport(true)}
-            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center gap-2"
-          >
-            <Upload className="w-5 h-5" />
-            Import CSV
-          </button>
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            Add Product
-          </button>
+      <div className="mb-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Manajemen Inventori</h1>
+            <p className="text-gray-500 mt-1">Kelola stok dan data produk</p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowCSVImport(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              <Upload className="w-5 h-5" />
+              Import CSV
+            </button>
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              <Plus className="w-5 h-5" />
+              Tambah Produk
+            </button>
+          </div>
         </div>
       </div>
 

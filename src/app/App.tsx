@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Store, Package, BarChart3, Users, LogOut } from "lucide-react";
 import { POSInterface } from "./components/pos-interface";
 import { InventoryManager } from "./components/inventory-manager";
 import { SalesHistory } from "./components/sales-history";
 import { Login } from "./components/login";
 import { UserManagement } from "./components/user-management";
+import { Sidebar } from "./components/sidebar";
+import { Reports } from "./components/reports";
 import { Product, CartItem, Sale } from "./types";
 import { productsAPI, salesAPI, authAPI } from "../services/supabase";
 import { dbToFrontendProduct, frontendToDbProduct } from "../utils/helpers";
@@ -17,7 +18,7 @@ interface UserData {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"pos" | "inventory" | "sales" | "users">("pos");
+  const [activeMenu, setActiveMenu] = useState<"pos" | "inventory" | "sales" | "reports" | "users">("pos");
   const [user, setUser] = useState<UserData | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -80,7 +81,7 @@ export default function App() {
           name: authUser.user_metadata?.name || "",
           role: authUser.user_metadata?.role || "cashier",
         });
-        setActiveTab("pos");
+        setActiveMenu("pos");
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -97,7 +98,7 @@ export default function App() {
       setAccessToken(null);
       setProducts([]);
       setSales([]);
-      setActiveTab("pos");
+      setActiveMenu("pos");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -277,131 +278,53 @@ export default function App() {
   const canAccessUsers = user.role === "admin";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                <Store className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">POS & Inventory</h1>
-                <p className="text-sm text-gray-500">Point of Sale Management System</p>
-              </div>
-            </div>
-
-            {/* User Info */}
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-semibold">{user.name}</p>
-                <p className="text-xs text-gray-500">
-                  {user.role === "admin" ? "Administrator" : "Kasir"}
-                </p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <nav className="flex gap-1 px-6">
-          <button
-            onClick={() => setActiveTab("pos")}
-            className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-              activeTab === "pos"
-                ? "border-blue-500 text-blue-600 font-semibold"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <Store className="w-5 h-5" />
-            Point of Sale
-          </button>
-
-          {canAccessInventory && (
-            <button
-              onClick={() => setActiveTab("inventory")}
-              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-                activeTab === "inventory"
-                  ? "border-blue-500 text-blue-600 font-semibold"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              <Package className="w-5 h-5" />
-              Inventory
-            </button>
-          )}
-
-          {canAccessSales && (
-            <button
-              onClick={() => setActiveTab("sales")}
-              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-                activeTab === "sales"
-                  ? "border-blue-500 text-blue-600 font-semibold"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              <BarChart3 className="w-5 h-5" />
-              Sales History
-            </button>
-          )}
-
-          {canAccessUsers && (
-            <button
-              onClick={() => setActiveTab("users")}
-              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-                activeTab === "users"
-                  ? "border-blue-500 text-blue-600 font-semibold"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              <Users className="w-5 h-5" />
-              Users
-            </button>
-          )}
-        </nav>
-      </header>
-
-      {/* Error Banner */}
-      {error && (
-        <div className="bg-red-100 border border-red-300 text-red-700 px-6 py-3 flex justify-between items-center">
-          <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-900 font-bold">
-            ×
-          </button>
-        </div>
-      )}
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <Sidebar
+        activeMenu={activeMenu}
+        onMenuChange={(menu) => setActiveMenu(menu as any)}
+        userRole={user.role}
+        userName={user.name}
+        onLogout={handleLogout}
+      />
 
       {/* Main Content */}
-      <main className="p-6">
-        {loading && (
-          <div className="fixed top-20 right-6 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
-            Loading...
+      <div className="flex-1 lg:ml-64">
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-red-100 border border-red-300 text-red-700 px-6 py-3 flex justify-between items-center">
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="text-red-900 font-bold">
+              ×
+            </button>
           </div>
         )}
 
-        {activeTab === "pos" && <POSInterface products={products} onSale={handleSale} />}
-        {activeTab === "inventory" && canAccessInventory && (
-          <InventoryManager
-            products={products}
-            onAddProduct={handleAddProduct}
-            onUpdateProduct={handleUpdateProduct}
-            onDeleteProduct={handleDeleteProduct}
-            onRefresh={loadProducts}
-          />
-        )}
-        {activeTab === "sales" && canAccessSales && <SalesHistory sales={sales} />}
-        {activeTab === "users" && canAccessUsers && (
-          <UserManagement accessToken={accessToken || ""} />
-        )}
-      </main>
+        {/* Main Content Area */}
+        <main className="min-h-screen">
+          {loading && (
+            <div className="fixed top-6 right-6 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+              Memuat...
+            </div>
+          )}
+
+          {activeMenu === "pos" && <POSInterface products={products} onSale={handleSale} />}
+          {activeMenu === "inventory" && canAccessInventory && (
+            <InventoryManager
+              products={products}
+              onAddProduct={handleAddProduct}
+              onUpdateProduct={handleUpdateProduct}
+              onDeleteProduct={handleDeleteProduct}
+              onRefresh={loadProducts}
+            />
+          )}
+          {activeMenu === "sales" && canAccessSales && <SalesHistory sales={sales} />}
+          {activeMenu === "reports" && canAccessSales && <Reports sales={sales} />}
+          {activeMenu === "users" && canAccessUsers && (
+            <UserManagement accessToken={accessToken || ""} />
+          )}
+        </main>
+      </div>
     </div>
   );
 }
