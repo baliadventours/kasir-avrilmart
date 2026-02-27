@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan, Menu } from "lucide-react";
 import { Product, CartItem } from "../types";
 import { ThermalReceipt } from "./thermal-receipt";
 
@@ -17,6 +17,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [lastSale, setLastSale] = useState<any>(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
 
   const availableProducts = products.filter((p) => p.stock > 0);
   
@@ -115,21 +116,19 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header Section - Fixed at Top */}
         <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 pb-3">
-          {/* Category Tabs */}
-          <div className="flex gap-2 mb-3 overflow-x-auto pb-1 pt-4">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                  selectedCategory === category
-                    ? "bg-[#E05D43] text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+          {/* Category Button & Selected Category */}
+          <div className="flex items-center gap-3 mb-3 pt-4">
+            <button
+              onClick={() => setShowCategoryMenu(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#E05D43] text-white rounded-lg hover:bg-[#C54D33] transition-all font-medium"
+            >
+              <Menu className="w-4 h-4" />
+              <span>Kategori</span>
+            </button>
+            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg flex-1">
+              <span className="text-sm text-gray-500">Kategori:</span>
+              <span className="text-sm font-medium text-gray-900">{selectedCategory}</span>
+            </div>
           </div>
 
           {/* Search */}
@@ -411,6 +410,66 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
           sale={lastSale}
           onClose={() => setShowReceipt(false)}
         />
+      )}
+
+      {/* Category Menu Modal */}
+      {showCategoryMenu && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[80vh] flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Pilih Kategori</h2>
+              <button
+                onClick={() => setShowCategoryMenu(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Categories List - Scrollable */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3">
+                {categories.map((category) => {
+                  const categoryProducts = category === "All" 
+                    ? availableProducts 
+                    : availableProducts.filter((p) => p.category === category);
+                  const productCount = categoryProducts.length;
+
+                  return (
+                    <button
+                      key={category}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setShowCategoryMenu(false);
+                      }}
+                      className={`p-4 rounded-xl text-left border-2 transition-all ${
+                        selectedCategory === category
+                          ? "bg-[#E05D43] text-white border-[#E05D43]"
+                          : "bg-white text-gray-900 border-gray-200 hover:border-[#E05D43] hover:bg-orange-50"
+                      }`}
+                    >
+                      <div className="font-semibold text-base mb-1 truncate">{category}</div>
+                      <div className={`text-sm ${selectedCategory === category ? 'text-white/80' : 'text-gray-500'}`}>
+                        {productCount} produk
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => setShowCategoryMenu(false)}
+                className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
