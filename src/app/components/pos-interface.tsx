@@ -112,11 +112,11 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
   return (
     <div className="flex h-screen bg-white overflow-hidden">
       {/* Main Content - Products */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Header Section - Compact */}
-        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3">
-          {/* Category Tabs - Compact */}
-          <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header Section - No Top Padding */}
+        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 pb-3">
+          {/* Category Tabs */}
+          <div className="flex gap-2 mb-3 overflow-x-auto pb-1 pt-3">
             {categories.map((category) => (
               <button
                 key={category}
@@ -132,7 +132,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
             ))}
           </div>
 
-          {/* Search - Compact */}
+          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -146,9 +146,9 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
           </div>
         </div>
 
-        {/* Products List - Scrollable */}
-        <div className="flex-1 overflow-y-auto px-4 py-2">
-          <div className="space-y-1.5">
+        {/* Products List - Fixed Height Calculation */}
+        <div className="flex-1 overflow-y-auto px-4 pb-4" style={{ maxHeight: 'calc(100vh - 140px)' }}>
+          <div className="space-y-1.5 pt-2">
             {filteredProducts.map((product) => {
               const retailPrice = product.priceRetail || product.price_retail || 0;
               const wholesalePrice = product.priceWholesale || product.price_wholesale || 0;
@@ -198,22 +198,22 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
         </div>
       </div>
 
-      {/* Sidebar - Order Aktif */}
-      <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-screen">
-        {/* Order Header - Compact */}
-        <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-3">
+      {/* Sidebar - Order Aktif - More Padding */}
+      <div className="w-96 bg-white border-l border-gray-200 flex flex-col overflow-hidden">
+        {/* Order Header */}
+        <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Order Aktif</h2>
             <div className="bg-[#E05D43] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">
               {cartCount}
             </div>
           </div>
           
-          {/* Price Type Selector - Compact */}
+          {/* Price Type Selector */}
           <div className="flex gap-2">
             <button
               onClick={() => setPriceType("retail")}
-              className={`flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 priceType === "retail"
                   ? "bg-[#E05D43] text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -223,7 +223,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
             </button>
             <button
               onClick={() => setPriceType("wholesale")}
-              className={`flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 priceType === "wholesale"
                   ? "bg-[#E05D43] text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -234,15 +234,15 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
           </div>
         </div>
 
-        {/* Cart Items - Scrollable */}
-        <div className="flex-1 overflow-y-auto px-4 py-3">
+        {/* Cart Items - Fixed Height */}
+        <div className="flex-1 overflow-y-auto px-6 py-4" style={{ maxHeight: 'calc(100vh - 320px)' }}>
           {cart.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-12">
               <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-2" />
               <p className="text-gray-400 text-sm">Belum ada item</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {cart.map((item) => (
                 <div key={item.id} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
                   <div className="flex justify-between items-start mb-2">
@@ -286,29 +286,29 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
           )}
         </div>
 
-        {/* Order Summary - Compact */}
+        {/* Order Summary - Fixed at Bottom */}
         {cart.length > 0 && (
-          <div className="flex-shrink-0 border-t border-gray-200 px-4 py-3 bg-gray-50">
-            <div className="space-y-1.5 text-sm mb-3">
+          <div className="flex-shrink-0 border-t border-gray-200 px-6 py-4 bg-gray-50">
+            <div className="space-y-2 text-sm mb-4">
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span>
                 <span>Rp {subtotal.toLocaleString("id-ID")}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Diskon</span>
-                <span>- Rp {discount.toLocaleString("id-ID")}</span>
+                <span>-Rp {discount.toLocaleString("id-ID")}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Pajak (10%)</span>
                 <span>Rp {tax.toLocaleString("id-ID")}</span>
               </div>
-              <div className="flex justify-between text-lg font-bold text-gray-900 pt-1.5 border-t">
+              <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-300">
                 <span>Total</span>
                 <span>Rp {total.toLocaleString("id-ID")}</span>
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 onClick={clearCart}
                 className="flex-1 py-2.5 rounded-lg border-2 border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors"
