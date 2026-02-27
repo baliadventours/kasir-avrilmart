@@ -24,7 +24,7 @@ export function ThermalReceipt({
   sale,
   storeName = "AVRIL MART",
   storeAddress = "Kintamani - Bali",
-  storePhone = "0812-3456-7890",
+  storePhone = "081246502939",
   onClose,
 }: ThermalReceiptProps) {
   const subtotal = sale.items.reduce((sum, item) => sum + item.total, 0);
