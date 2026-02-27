@@ -53,6 +53,7 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
       id: sale.id,
       total: sale.total,
       payment_type: (sale.priceType === "retail" ? "retail" : "wholesale") as "retail" | "wholesale",
+      payment_amount: sale.payment_amount,
       created_at: sale.date,
       items: sale.items.map(item => ({
         product_name: item.name,

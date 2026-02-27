@@ -88,6 +88,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
         id: Date.now().toString(),
         total: total,
         payment_type: priceType,
+        payment_amount: payment,
         created_at: new Date().toISOString(),
         items: cart.map(item => ({
           product_name: item.name,

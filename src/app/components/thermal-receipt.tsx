@@ -6,6 +6,7 @@ interface ThermalReceiptProps {
     total: number;
     payment_type: "retail" | "wholesale";
     created_at: string;
+    payment_amount?: number;
     items: Array<{
       product_name: string;
       quantity: number;
@@ -49,11 +50,93 @@ export function ThermalReceipt({
           </div>
 
           {/* Preview of thermal receipt */}
-          <div className="border rounded-lg p-4 mb-4 bg-gray-50">
-            <div className="text-xs font-mono text-center space-y-1">
-              <div className="font-bold text-sm">{storeName}</div>
-              <div>{storeAddress}</div>
-              <div>Telp: {storePhone}</div>
+          <div className="border rounded-lg p-4 mb-4 bg-gray-50 max-h-96 overflow-y-auto">
+            {/* Header */}
+            <div className="text-center space-y-1 mb-4 pb-3 border-b border-dashed border-gray-400">
+              <div className="font-bold text-base">{storeName}</div>
+              <div className="text-xs">{storeAddress}</div>
+              <div className="text-xs">Telp: {storePhone}</div>
+            </div>
+
+            {/* Transaction Info */}
+            <div className="text-xs space-y-1 mb-4 pb-3 border-b border-dashed border-gray-400">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tanggal</span>
+                <span className="font-medium">
+                  {new Date(sale.created_at).toLocaleDateString("id-ID", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Waktu</span>
+                <span className="font-medium">
+                  {new Date(sale.created_at).toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">No. Transaksi</span>
+                <span className="font-medium">{sale.id.slice(0, 8).toUpperCase()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tipe</span>
+                <span className="font-medium">{sale.payment_type === "retail" ? "Eceran" : "Grosir"}</span>
+              </div>
+            </div>
+
+            {/* Items */}
+            <div className="space-y-3 mb-4 pb-3 border-b border-dashed border-gray-400">
+              {sale.items.map((item, index) => (
+                <div key={index} className="text-xs">
+                  <div className="font-semibold text-gray-900">{item.product_name}</div>
+                  <div className="flex justify-between text-gray-600 mt-1">
+                    <span>
+                      {item.quantity} x Rp {item.price.toLocaleString("id-ID")}
+                    </span>
+                    <span className="font-medium text-gray-900">Rp {item.total.toLocaleString("id-ID")}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Totals */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs text-gray-600">
+                <span>Subtotal</span>
+                <span className="font-medium">Rp {subtotal.toLocaleString("id-ID")}</span>
+              </div>
+              <div className="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-gray-300">
+                <span>TOTAL</span>
+                <span>Rp {total.toLocaleString("id-ID")}</span>
+              </div>
+              
+              {/* Payment Info */}
+              {sale.payment_amount && sale.payment_amount > 0 && (
+                <>
+                  <div className="flex justify-between text-xs text-gray-600 pt-2 border-t border-dashed border-gray-300">
+                    <span>Bayar</span>
+                    <span className="font-medium">Rp {sale.payment_amount.toLocaleString("id-ID")}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-600">
+                    <span>Kembalian</span>
+                    <span className="font-medium">Rp {(sale.payment_amount - total).toLocaleString("id-ID")}</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="text-center text-xs text-gray-600 mt-4 pt-3 border-t border-dashed border-gray-400">
+              <div className="font-semibold text-gray-900 mb-1">
+                Terima kasih sudah berbelanja di Avril Mart
+              </div>
+              <div>Barang yang sudah dibeli</div>
+              <div>tidak dapat dikembalikan</div>
             </div>
           </div>
 
@@ -220,6 +303,31 @@ export function ThermalReceipt({
               <span>TOTAL</span>
               <span>Rp {total.toLocaleString("id-ID")}</span>
             </div>
+            
+            {/* Payment Info */}
+            {sale.payment_amount && sale.payment_amount > 0 && (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: "8px",
+                  }}
+                >
+                  <span>Bayar</span>
+                  <span>Rp {sale.payment_amount.toLocaleString("id-ID")}</span>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span>Kembalian</span>
+                  <span>Rp {(sale.payment_amount - total).toLocaleString("id-ID")}</span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Separator */}

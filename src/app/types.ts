@@ -28,4 +28,5 @@ export interface Sale {
   items: CartItem[];
   total: number;
   priceType: "retail" | "wholesale";
+  payment_amount?: number;
 }
