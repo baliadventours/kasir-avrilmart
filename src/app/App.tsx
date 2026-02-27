@@ -50,15 +50,29 @@ export default function App() {
       const session = await authAPI.getSession();
 
       if (session) {
-        const user = await authAPI.getUser();
-        if (user) {
-          setAccessToken(session.access_token);
-          setUser({
-            id: user.id,
-            email: user.email || "",
-            name: user.user_metadata?.name || "",
-            role: user.user_metadata?.role || "cashier",
-          });
+        const authUser = await authAPI.getUser();
+        if (authUser) {
+          // Fetch user profile from users table to get correct role
+          try {
+            const userProfile = await authAPI.getUserProfile(authUser.id);
+            setAccessToken(session.access_token);
+            setUser({
+              id: authUser.id,
+              email: authUser.email || "",
+              name: userProfile.name || authUser.user_metadata?.name || "",
+              role: userProfile.role || "cashier",
+            });
+          } catch (profileError) {
+            console.error("Error fetching user profile:", profileError);
+            // Fallback to auth metadata
+            setAccessToken(session.access_token);
+            setUser({
+              id: authUser.id,
+              email: authUser.email || "",
+              name: authUser.user_metadata?.name || "",
+              role: authUser.user_metadata?.role || "cashier",
+            });
+          }
         }
       }
     } catch (error) {
@@ -76,14 +90,29 @@ export default function App() {
       const { session, user: authUser } = await authAPI.signIn(email, password);
 
       if (session && authUser) {
-        setAccessToken(session.access_token);
-        setUser({
-          id: authUser.id,
-          email: authUser.email || "",
-          name: authUser.user_metadata?.name || "",
-          role: authUser.user_metadata?.role || "cashier",
-        });
-        setActiveMenu("pos");
+        // Fetch user profile from users table to get correct role
+        try {
+          const userProfile = await authAPI.getUserProfile(authUser.id);
+          setAccessToken(session.access_token);
+          setUser({
+            id: authUser.id,
+            email: authUser.email || "",
+            name: userProfile.name || authUser.user_metadata?.name || "",
+            role: userProfile.role || "cashier",
+          });
+          setActiveMenu("pos");
+        } catch (profileError) {
+          console.error("Error fetching user profile:", profileError);
+          // Fallback to auth metadata
+          setAccessToken(session.access_token);
+          setUser({
+            id: authUser.id,
+            email: authUser.email || "",
+            name: authUser.user_metadata?.name || "",
+            role: authUser.user_metadata?.role || "cashier",
+          });
+          setActiveMenu("pos");
+        }
       }
     } catch (error: any) {
       console.error("Login error:", error);

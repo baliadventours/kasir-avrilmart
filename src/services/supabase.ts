@@ -374,4 +374,19 @@ export const authAPI = {
     }
     return data.user;
   },
+
+  // Get user profile from users table (with role)
+  async getUserProfile(userId: string) {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Get user profile error:", error);
+      throw error;
+    }
+    return data;
+  },
 };
