@@ -11,9 +11,11 @@ interface CSVImportProps {
 interface ProductCSVRow {
   name: string;
   sku: string;
+  barcode?: string;
   category: string;
   retail_price: string | number;
   wholesale_price: string | number;
+  modal_price?: string | number;
   stock: string | number;
   image_url?: string;
 }
@@ -36,10 +38,10 @@ export function CSVImport({ onClose, onSuccess }: CSVImportProps) {
   } | null>(null);
 
   const downloadTemplate = () => {
-    const template = `name,sku,category,retail_price,wholesale_price,stock,image_url
-Wireless Headphones,WH-001,Electronics,150000,120000,50,
-Smart Watch,SW-002,Electronics,500000,450000,30,
-Coffee Mug,CM-003,Kitchenware,50000,40000,100,`;
+    const template = `name,sku,barcode,category,retail_price,wholesale_price,modal_price,stock,image_url
+Wireless Headphones,WH-001,,Electronics,150000,120000,100000,50,
+Smart Watch,SW-002,,Electronics,500000,450000,400000,30,
+Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100,`;
 
     const blob = new Blob([template], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -67,12 +69,16 @@ Coffee Mug,CM-003,Kitchenware,50000,40000,100,`;
     // Price validation
     const retailPrice = parseFloat(row.retail_price);
     const wholesalePrice = parseFloat(row.wholesale_price);
+    const modalPrice = row.modal_price ? parseFloat(row.modal_price) : null;
     
     if (isNaN(retailPrice) || retailPrice <= 0) {
       errors.push(`Row ${index + 2}: Harga eceran harus angka positif`);
     }
     if (isNaN(wholesalePrice) || wholesalePrice <= 0) {
       errors.push(`Row ${index + 2}: Harga grosir harus angka positif`);
+    }
+    if (modalPrice !== null && (isNaN(modalPrice) || modalPrice <= 0)) {
+      errors.push(`Row ${index + 2}: Harga modal harus angka positif`);
     }
 
     // Stock validation
@@ -141,9 +147,11 @@ Coffee Mug,CM-003,Kitchenware,50000,40000,100,`;
         await productsAPI.create({
           name: row.name.trim(),
           sku: row.sku.trim(),
+          barcode: row.barcode?.trim() || null,
           category: row.category.trim(),
           retail_price: parseFloat(row.retail_price.toString()),
           wholesale_price: parseFloat(row.wholesale_price.toString()),
+          modal_price: row.modal_price ? parseFloat(row.modal_price.toString()) : null,
           stock: parseInt(row.stock.toString()),
           image_url: row.image_url?.trim() || null,
         });
@@ -180,8 +188,8 @@ Coffee Mug,CM-003,Kitchenware,50000,40000,100,`;
                 Format CSV yang Diperlukan
               </h3>
               <p className="text-sm text-blue-800 mb-3">
-                File CSV harus memiliki kolom: name, sku, category, retail_price,
-                wholesale_price, stock, image_url (optional)
+                File CSV harus memiliki kolom: name, sku, barcode (optional), category, retail_price,
+                wholesale_price, modal_price (optional), stock, image_url (optional)
               </p>
               <button
                 onClick={downloadTemplate}
@@ -261,9 +269,11 @@ Coffee Mug,CM-003,Kitchenware,50000,40000,100,`;
                   <tr>
                     <th className="px-3 py-2 text-left">Nama</th>
                     <th className="px-3 py-2 text-left">SKU</th>
+                    <th className="px-3 py-2 text-left">Barcode</th>
                     <th className="px-3 py-2 text-left">Kategori</th>
                     <th className="px-3 py-2 text-right">Harga Eceran</th>
                     <th className="px-3 py-2 text-right">Harga Grosir</th>
+                    <th className="px-3 py-2 text-right">Harga Modal</th>
                     <th className="px-3 py-2 text-right">Stok</th>
                   </tr>
                 </thead>
@@ -272,12 +282,16 @@ Coffee Mug,CM-003,Kitchenware,50000,40000,100,`;
                     <tr key={index} className="border-t hover:bg-gray-50">
                       <td className="px-3 py-2">{row.name}</td>
                       <td className="px-3 py-2">{row.sku}</td>
+                      <td className="px-3 py-2">{row.barcode}</td>
                       <td className="px-3 py-2">{row.category}</td>
                       <td className="px-3 py-2 text-right">
                         {parseFloat(row.retail_price.toString()).toLocaleString("id-ID")}
                       </td>
                       <td className="px-3 py-2 text-right">
                         {parseFloat(row.wholesale_price.toString()).toLocaleString("id-ID")}
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        {row.modal_price ? parseFloat(row.modal_price.toString()).toLocaleString("id-ID") : "-"}
                       </td>
                       <td className="px-3 py-2 text-right">{row.stock}</td>
                     </tr>
