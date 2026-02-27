@@ -9,6 +9,7 @@ export interface Product {
   priceModal?: number;  // For frontend (camelCase) - Cost price
   stock: number;
   sku: string;
+  barcode?: string;  // Barcode field
   category: string;
   image?: string;
   created_at?: string;

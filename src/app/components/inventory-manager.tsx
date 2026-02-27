@@ -28,6 +28,7 @@ export function InventoryManager({
     priceModal: "",
     stock: "",
     sku: "",
+    barcode: "",
     category: "",
     image: "",
   });
@@ -40,6 +41,7 @@ export function InventoryManager({
       priceModal: "",
       stock: "",
       sku: "",
+      barcode: "",
       category: "",
       image: "",
     });
@@ -57,6 +59,7 @@ export function InventoryManager({
       priceModal: parseFloat(formData.priceModal) || 0,
       stock: parseInt(formData.stock),
       sku: formData.sku,
+      barcode: formData.barcode || "",
       category: formData.category,
       image: formData.image || `https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop`,
     };
@@ -78,6 +81,7 @@ export function InventoryManager({
       priceModal: (product.priceModal || product.price_modal || 0).toString(),
       stock: product.stock.toString(),
       sku: product.sku,
+      barcode: product.barcode || "",
       category: product.category,
       image: product.image || "",
     });
@@ -307,6 +311,17 @@ export function InventoryManager({
                   value={formData.stock}
                   onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-1">Barcode (optional)</label>
+                <input
+                  type="text"
+                  value={formData.barcode}
+                  onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="123456789012"
                 />
               </div>
 
