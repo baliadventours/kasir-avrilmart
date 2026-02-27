@@ -141,9 +141,6 @@ export function InventoryManager({
                 Product
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                SKU
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                 Category
               </th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
@@ -164,16 +161,14 @@ export function InventoryManager({
             {products.map((product) => (
               <tr key={product.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-12 h-12 rounded object-cover"
-                    />
-                    <span className="font-medium">{product.name}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900">{product.name}</span>
+                    <span className="text-sm text-gray-500">SKU: {product.sku}</span>
+                    {product.barcode && (
+                      <span className="text-xs text-gray-400">Barcode: {product.barcode}</span>
+                    )}
                   </div>
                 </td>
-                <td className="px-6 py-4 text-gray-600">{product.sku}</td>
                 <td className="px-6 py-4">
                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded">
                     {product.category}

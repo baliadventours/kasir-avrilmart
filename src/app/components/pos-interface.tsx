@@ -113,10 +113,10 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
     <div className="flex h-screen bg-white overflow-hidden">
       {/* Main Content - Products */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header Section - No Top Padding */}
-        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 pb-3">
+        {/* Header Section - Fixed at Top */}
+        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 pb-3">
           {/* Category Tabs */}
-          <div className="flex gap-2 mb-3 overflow-x-auto pb-1 pt-3">
+          <div className="flex gap-2 mb-3 overflow-x-auto pb-1 pt-4">
             {categories.map((category) => (
               <button
                 key={category}
@@ -146,9 +146,9 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
           </div>
         </div>
 
-        {/* Products List - Fixed Height Calculation */}
-        <div className="flex-1 overflow-y-auto px-4 pb-4" style={{ maxHeight: 'calc(100vh - 140px)' }}>
-          <div className="space-y-1.5 pt-2">
+        {/* Products List - Scrollable with Bottom Padding */}
+        <div className="flex-1 overflow-y-auto px-6" style={{ maxHeight: 'calc(100vh - 140px)' }}>
+          <div className="space-y-1.5 pt-4 pb-6">
             {filteredProducts.map((product) => {
               const retailPrice = product.priceRetail || product.price_retail || 0;
               const wholesalePrice = product.priceWholesale || product.price_wholesale || 0;
