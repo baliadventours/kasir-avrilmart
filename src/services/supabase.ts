@@ -2,8 +2,6 @@ import { createClient } from "@supabase/supabase-js";
 import { projectId, publicAnonKey } from "../../utils/supabase/info";
 
 // Get Supabase credentials
-// In Figma Make environment, use the info.tsx file
-// In Vercel deployment, use environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || `https://${projectId}.supabase.co`;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || publicAnonKey;
 
@@ -373,20 +371,5 @@ export const authAPI = {
       throw error;
     }
     return data.user;
-  },
-
-  // Get user profile from users table (with role)
-  async getUserProfile(userId: string) {
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single();
-
-    if (error) {
-      console.error("Get user profile error:", error);
-      throw error;
-    }
-    return data;
   },
 };
