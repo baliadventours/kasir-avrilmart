@@ -18,7 +18,7 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
   const todaySales = sales.filter((sale) => new Date(sale.date).toDateString() === today);
   const todayRevenue = todaySales.reduce((sum, sale) => sum + sale.total, 0);
 
-  const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+  const [selectedSale, setSelectedSale] = useState<any | null>(null);
 
   const exportToCSV = () => {
     const csvHeader = "No Transaksi,Tanggal,Waktu,Tipe Harga,Item,Jumlah,Total\n";
@@ -48,7 +48,6 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
   };
 
   const handleReprintReceipt = (sale: Sale) => {
-    // Prevent default link behavior
     // Convert Sale to receipt format
     const receiptSale = {
       id: sale.id,
@@ -58,11 +57,12 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
       items: sale.items.map(item => ({
         product_name: item.name,
         quantity: item.quantity,
-        price: item.price,
-        total: item.price * item.quantity
+        price: item.appliedPrice,
+        total: item.appliedPrice * item.quantity
       }))
     };
-    setSelectedSale(receiptSale as any);
+    
+    setSelectedSale(receiptSale);
   };
 
   return (
