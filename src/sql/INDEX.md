@@ -6,19 +6,6 @@
 
 ## **Start Here** ⭐
 
-### **[SETUP_AVRILMART_GUIDE.md](SETUP_AVRILMART_GUIDE.md)** 🎯 NEW!
-- ✅ Complete AvrilMart setup with sample data
-- ✅ 12 categories + 35 products included
-- ✅ Step-by-step with admin user creation
-- ✅ Visual guide with screenshots
-- ✅ 5-minute setup time
-
-### **[VISUAL_GUIDE.md](VISUAL_GUIDE.md)** 🎨 NEW!
-- ✅ Visual flowchart setup guide
-- ✅ ASCII diagrams & boxes
-- ✅ Quick reference cards
-- ✅ At-a-glance instructions
-
 ### **[README.md](README.md)**
 - ✅ 5-minute quick setup guide
 - ✅ Most common issues
@@ -28,18 +15,7 @@
 
 ## **Setup Scripts** 📝
 
-### **1. [SETUP_AVRILMART_COMPLETE.sql](SETUP_AVRILMART_COMPLETE.sql)** 🎯 BEST!
-```
-✅ Complete AvrilMart setup with sample data
-✅ Creates all 5 tables
-✅ Inserts 12 categories
-✅ Inserts 35 products with barcodes
-✅ Full security (RLS)
-✅ All triggers & indexes
-✅ Ready for production in 5 minutes
-```
-
-### **2. [00_setup_all_tables.sql](00_setup_all_tables.sql)** ⚡ RECOMMENDED
+### **1. [00_setup_all_tables.sql](00_setup_all_tables.sql)** ⚡ RECOMMENDED
 ```
 ✅ All-in-one setup script
 ✅ Creates all 5 tables
@@ -49,7 +25,7 @@
 ✅ Ready to use in 2 minutes
 ```
 
-### **3. [01_create_users_table.sql](01_create_users_table.sql)**
+### **2. [01_create_users_table.sql](01_create_users_table.sql)**
 ```
 ✅ Creates users table
 ✅ Links to auth.users
@@ -57,7 +33,7 @@
 ✅ RLS policies
 ```
 
-### **4. [02_create_products_table.sql](02_create_products_table.sql)**
+### **3. [02_create_products_table.sql](02_create_products_table.sql)**
 ```
 ✅ Creates products table
 ✅ SKU, barcode, pricing, stock
@@ -65,7 +41,7 @@
 ✅ Indexes for performance
 ```
 
-### **5. [03_create_sales_tables.sql](03_create_sales_tables.sql)**
+### **4. [03_create_sales_tables.sql](03_create_sales_tables.sql)**
 ```
 ✅ Creates sales & sale_items tables
 ✅ Foreign keys
@@ -73,7 +49,7 @@
 ✅ RLS policies
 ```
 
-### **6. [04_create_categories_table.sql](04_create_categories_table.sql)**
+### **5. [04_create_categories_table.sql](04_create_categories_table.sql)**
 ```
 ✅ Creates categories table
 ✅ Master data for products
