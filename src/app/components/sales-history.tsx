@@ -1,5 +1,7 @@
-import { Receipt, TrendingUp, DollarSign, ShoppingBag } from "lucide-react";
+import { Receipt, TrendingUp, DollarSign, ShoppingBag, Download, Printer } from "lucide-react";
 import { Sale } from "../types";
+import { useState } from "react";
+import { ThermalReceipt } from "./thermal-receipt";
 
 interface SalesHistoryProps {
   sales: Sale[];
@@ -16,12 +18,67 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
   const todaySales = sales.filter((sale) => new Date(sale.date).toDateString() === today);
   const todayRevenue = todaySales.reduce((sum, sale) => sum + sale.total, 0);
 
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+
+  const exportToCSV = () => {
+    const csvHeader = "No Transaksi,Tanggal,Waktu,Tipe Harga,Item,Jumlah,Total\n";
+    const csvContent = sales
+      .map((sale) => {
+        const date = new Date(sale.date);
+        const dateStr = date.toLocaleDateString("id-ID");
+        const timeStr = date.toLocaleTimeString("id-ID");
+        const txnId = sale.id.slice(0, 8).toUpperCase();
+        const priceType = sale.priceType === "retail" ? "Eceran" : "Grosir";
+        const items = sale.items.map(item => `${item.name} (x${item.quantity})`).join("; ");
+        const totalQty = sale.items.reduce((sum, item) => sum + item.quantity, 0);
+        
+        return `${txnId},${dateStr},${timeStr},${priceType},"${items}",${totalQty},${sale.total}`;
+      })
+      .join("\n");
+
+    const blob = new Blob([csvHeader + csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `laporan-penjualan-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleReprintReceipt = (sale: Sale) => {
+    // Convert Sale to receipt format
+    const receiptSale = {
+      id: sale.id,
+      total: sale.total,
+      payment_type: sale.priceType === "retail" ? "retail" : "wholesale" as "retail" | "wholesale",
+      created_at: sale.date,
+      items: sale.items.map(item => ({
+        product_name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        total: item.price * item.quantity
+      }))
+    };
+    setSelectedSale(receiptSale as any);
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-medium text-gray-900">Riwayat Penjualan</h1>
-        <p className="text-sm text-gray-500 mt-1">Track your sales and revenue</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-medium text-gray-900">Riwayat Penjualan</h1>
+          <p className="text-sm text-gray-500 mt-1">Track your sales and revenue</p>
+        </div>
+        <button
+          onClick={exportToCSV}
+          className="flex items-center gap-2 px-4 py-2 bg-[#E05D43] text-white rounded-lg hover:bg-[#C54D33] font-medium transition-colors"
+        >
+          <Download className="w-5 h-5" />
+          Export Laporan
+        </button>
       </div>
 
       {/* Stats */}
@@ -66,27 +123,33 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
             <thead className="bg-gray-50 sticky top-0">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
+                  No Transaksi
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                   Date & Time
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                  Price Type
+                  Tipe Harga
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                   Items
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                  Quantity
+                  Jumlah
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">
                   Total
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
+                  Aksi
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {sales.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-400">
-                    No sales yet
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
+                    Belum ada transaksi
                   </td>
                 </tr>
               ) : (
@@ -95,10 +158,19 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
                   .reverse()
                   .map((sale) => {
                     const totalQty = sale.items.reduce((sum, item) => sum + item.quantity, 0);
+                    const txnId = sale.id.slice(0, 8).toUpperCase();
                     return (
                       <tr key={sale.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-gray-600">
-                          {new Date(sale.date).toLocaleString()}
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() => handleReprintReceipt(sale)}
+                            className="font-mono font-semibold text-[#E05D43] hover:text-[#C54D33] hover:underline cursor-pointer"
+                          >
+                            {txnId}
+                          </button>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 text-sm">
+                          {new Date(sale.date).toLocaleString("id-ID")}
                         </td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -112,19 +184,28 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
                         <td className="px-6 py-4">
                           <div className="space-y-1">
                             {sale.items.map((item, idx) => (
-                              <div key={idx} className="text-sm">
+                              <div key={idx} className="text-sm text-gray-700">
                                 {item.name} (x{item.quantity})
                               </div>
                             ))}
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="px-2 py-1 bg-gray-100 rounded text-sm">
+                          <span className="px-2 py-1 bg-gray-100 rounded text-sm font-medium">
                             {totalQty} items
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right font-bold text-green-600">
-                          Rp {sale.total.toLocaleString()}
+                          Rp {sale.total.toLocaleString("id-ID")}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => handleReprintReceipt(sale)}
+                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors inline-flex items-center justify-center"
+                            title="Cetak Ulang Nota"
+                          >
+                            <Printer className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     );
@@ -134,6 +215,11 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
           </table>
         </div>
       </div>
+
+      {/* Thermal Receipt */}
+      {selectedSale && (
+        <ThermalReceipt sale={selectedSale} onClose={() => setSelectedSale(null)} />
+      )}
     </div>
   );
 }

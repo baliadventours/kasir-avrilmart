@@ -21,8 +21,8 @@ interface ThermalReceiptProps {
 
 export function ThermalReceipt({
   sale,
-  storeName = "TOKO SERBA ADA",
-  storeAddress = "Jl. Contoh No. 123, Jakarta",
+  storeName = "AVRIL MART",
+  storeAddress = "Kintamani - Bali",
   storePhone = "0812-3456-7890",
   onClose,
 }: ThermalReceiptProps) {
@@ -249,7 +249,9 @@ export function ThermalReceipt({
               marginTop: "15px",
             }}
           >
-            <div>Terima kasih atas kunjungan Anda</div>
+            <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
+              Terima kasih sudah berbelanja di Avril Mart
+            </div>
             <div style={{ marginTop: "5px" }}>Barang yang sudah dibeli</div>
             <div>tidak dapat dikembalikan</div>
           </div>

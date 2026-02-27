@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, Package, AlertTriangle, Upload } from "lucide-react";
+import { Plus, Edit2, Trash2, Package, AlertTriangle, Upload, Download } from "lucide-react";
 import { Product } from "../types";
 import { CSVImport } from "./csv-import";
 
@@ -110,6 +110,25 @@ export function InventoryManager({
 
   const lowStockProducts = products.filter((p) => p.stock < 10);
 
+  const exportProductsToCSV = () => {
+    const csvHeader = "Nama Produk,SKU,Barcode,Kategori,Harga Eceran,Harga Grosir,Harga Modal,Stok\n";
+    const csvContent = products
+      .map((product) => {
+        return `"${product.name}",${product.sku},${product.barcode || ""},${product.category},${product.priceRetail},${product.priceWholesale},${product.priceModal || 0},${product.stock}`;
+      })
+      .join("\n");
+
+    const blob = new Blob([csvHeader + csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `data-produk-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -120,6 +139,13 @@ export function InventoryManager({
             <p className="text-sm text-gray-500 mt-1">Kelola stok dan data produk</p>
           </div>
           <div className="flex gap-3">
+            <button
+              onClick={exportProductsToCSV}
+              className="flex items-center gap-2 px-4 py-2 bg-[#E05D43] text-white rounded-lg hover:bg-[#C54D33] font-medium"
+            >
+              <Download className="w-5 h-5" />
+              Export Produk
+            </button>
             <button
               onClick={() => setShowCSVImport(true)}
               className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
