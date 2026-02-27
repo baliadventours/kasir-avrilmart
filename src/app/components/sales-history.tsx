@@ -17,11 +17,11 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
   const todayRevenue = todaySales.reduce((sum, sale) => sum + sale.total, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold">Sales History</h2>
-        <p className="text-gray-500">Track your sales and revenue</p>
+        <h1 className="text-2xl font-medium text-gray-900">Riwayat Penjualan</h1>
+        <p className="text-sm text-gray-500 mt-1">Track your sales and revenue</p>
       </div>
 
       {/* Stats */}

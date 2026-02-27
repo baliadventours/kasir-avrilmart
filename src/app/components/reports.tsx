@@ -138,7 +138,7 @@ export function Reports({ sales }: ReportsProps) {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -147,7 +147,7 @@ export function Reports({ sales }: ReportsProps) {
         </div>
         <button
           onClick={exportReport}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#E05D43] text-white rounded-lg hover:bg-[#C54D33] transition-colors"
         >
           <Download className="w-4 h-4" />
           Ekspor CSV

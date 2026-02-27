@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { UserPlus, Users, Shield, User } from "lucide-react";
-import { projectId, publicAnonKey } from "/utils/supabase/info";
+import { supabase } from "../../services/supabase";
 
 interface UserManagementProps {
   accessToken: string;
@@ -23,30 +23,49 @@ export function UserManagement({ accessToken }: UserManagementProps) {
     setMessage(null);
 
     try {
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-b5055851/signup`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`, // Use accessToken instead of publicAnonKey
+      // Use the existing auth API which calls the edge function
+      const result = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+            role: formData.role,
           },
-          body: JSON.stringify(formData),
-        }
-      );
+        },
+      });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ type: "success", text: `User ${formData.name} berhasil dibuat!` });
-        setFormData({ name: "", email: "", password: "", role: "cashier" });
-        setShowForm(false);
-      } else {
-        setMessage({ type: "error", text: data.error || "Gagal membuat user" });
+      if (result.error) {
+        throw result.error;
       }
-    } catch (error) {
+
+      if (result.data.user) {
+        // Insert into users table
+        const { error: dbError } = await supabase
+          .from("users")
+          .insert([
+            {
+              id: result.data.user.id,
+              name: formData.name,
+              email: formData.email,
+              role: formData.role,
+            },
+          ]);
+
+        if (dbError) {
+          console.error("Database error:", dbError);
+        }
+      }
+
+      setMessage({ type: "success", text: `User ${formData.name} berhasil dibuat!` });
+      setFormData({ name: "", email: "", password: "", role: "cashier" });
+      setShowForm(false);
+    } catch (error: any) {
       console.error("Error creating user:", error);
-      setMessage({ type: "error", text: "Terjadi kesalahan saat membuat user" });
+      setMessage({ 
+        type: "error", 
+        text: error.message || "Gagal membuat user." 
+      });
     } finally {
       setLoading(false);
     }
