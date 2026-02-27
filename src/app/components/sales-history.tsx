@@ -48,11 +48,12 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
   };
 
   const handleReprintReceipt = (sale: Sale) => {
+    // Prevent default link behavior
     // Convert Sale to receipt format
     const receiptSale = {
       id: sale.id,
       total: sale.total,
-      payment_type: sale.priceType === "retail" ? "retail" : "wholesale" as "retail" | "wholesale",
+      payment_type: (sale.priceType === "retail" ? "retail" : "wholesale") as "retail" | "wholesale",
       created_at: sale.date,
       items: sale.items.map(item => ({
         product_name: item.name,

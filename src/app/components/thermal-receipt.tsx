@@ -27,7 +27,6 @@ export function ThermalReceipt({
   onClose,
 }: ThermalReceiptProps) {
   const subtotal = sale.items.reduce((sum, item) => sum + item.total, 0);
-  const tax = subtotal * 0.1;
   const total = sale.total;
 
   const handlePrint = () => {
@@ -208,16 +207,6 @@ export function ThermalReceipt({
             >
               <span>Subtotal</span>
               <span>Rp {subtotal.toLocaleString("id-ID")}</span>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "4px",
-              }}
-            >
-              <span>Pajak (10%)</span>
-              <span>Rp {tax.toLocaleString("id-ID")}</span>
             </div>
             <div
               style={{

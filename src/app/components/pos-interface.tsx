@@ -33,8 +33,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
 
   const subtotal = cart.reduce((sum, item) => sum + item.appliedPrice * item.quantity, 0);
   const discount = 0;
-  const tax = subtotal * 0.1;
-  const total = subtotal - discount + tax;
+  const total = subtotal - discount;
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const addToCart = (product: Product) => {
@@ -298,10 +297,6 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
                 <span>Diskon</span>
                 <span>-Rp {discount.toLocaleString("id-ID")}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Pajak (10%)</span>
-                <span>Rp {tax.toLocaleString("id-ID")}</span>
-              </div>
               <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-300">
                 <span>Total</span>
                 <span>Rp {total.toLocaleString("id-ID")}</span>
@@ -345,10 +340,6 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span>
                 <span>Rp {subtotal.toLocaleString("id-ID")}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Pajak (10%)</span>
-                <span>Rp {tax.toLocaleString("id-ID")}</span>
               </div>
               <div className="flex justify-between text-lg font-semibold text-gray-900 pt-2 border-t">
                 <span>Total</span>
