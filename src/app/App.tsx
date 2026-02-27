@@ -278,7 +278,7 @@ export default function App() {
   const canAccessUsers = user.role === "admin";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-white flex">
       {/* Sidebar */}
       <Sidebar
         activeMenu={activeMenu}
@@ -289,25 +289,26 @@ export default function App() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 lg:ml-64 bg-gray-50">
         {/* Error Banner */}
         {error && (
-          <div className="bg-red-100 border border-red-300 text-red-700 px-6 py-3 flex justify-between items-center">
+          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-6 py-3 flex justify-between items-center">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="text-red-900 font-bold">
+            <button onClick={() => setError(null)} className="text-red-900 font-bold hover:text-red-700">
               ×
             </button>
           </div>
         )}
 
-        {/* Main Content Area */}
-        <main className="min-h-screen">
-          {loading && (
-            <div className="fixed top-6 right-6 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-              Memuat...
-            </div>
-          )}
+        {/* Loading Indicator */}
+        {loading && (
+          <div className="fixed top-6 right-6 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm">
+            Memuat...
+          </div>
+        )}
 
+        {/* Main Content Area */}
+        <main>
           {activeMenu === "pos" && <POSInterface products={products} onSale={handleSale} />}
           {activeMenu === "inventory" && canAccessInventory && (
             <InventoryManager

@@ -142,12 +142,12 @@ export function Reports({ sales }: ReportsProps) {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Laporan Penjualan</h1>
-          <p className="text-gray-500 mt-1">Analisis dan ringkasan penjualan toko</p>
+          <h1 className="text-2xl font-medium text-gray-900">Laporan Penjualan</h1>
+          <p className="text-sm text-gray-500 mt-1">Analisis dan ringkasan penjualan toko</p>
         </div>
         <button
           onClick={exportReport}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
         >
           <Download className="w-4 h-4" />
           Ekspor CSV
@@ -155,7 +155,7 @@ export function Reports({ sales }: ReportsProps) {
       </div>
 
       {/* Period Selector */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="flex flex-col md:flex-row gap-4 items-center">
           {/* Period buttons */}
           <div className="flex gap-2">
@@ -168,7 +168,7 @@ export function Reports({ sales }: ReportsProps) {
                 }}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   period === p
-                    ? "bg-blue-600 text-white"
+                    ? "bg-gray-900 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -185,9 +185,9 @@ export function Reports({ sales }: ReportsProps) {
             >
               ←
             </button>
-            <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg flex-1 justify-center">
-              <Calendar className="w-5 h-5 text-blue-600" />
-              <span className="font-semibold text-blue-800">{getPeriodLabel()}</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg flex-1 justify-center border border-gray-200">
+              <Calendar className="w-5 h-5 text-gray-600" />
+              <span className="font-medium text-gray-900">{getPeriodLabel()}</span>
             </div>
             <button
               onClick={() => changeDate("next")}
@@ -202,101 +202,101 @@ export function Reports({ sales }: ReportsProps) {
       {/* Summary Cards */}
       {reportData && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Sales */}
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg shadow-lg p-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-between mb-3">
-                <DollarSign className="w-8 h-8 opacity-80" />
-                <span className="text-xs font-semibold bg-white bg-opacity-20 px-2 py-1 rounded">
-                  TOTAL
+                <DollarSign className="w-8 h-8 text-gray-400" />
+                <span className="text-xs font-medium text-gray-500 uppercase">
+                  Total
                 </span>
               </div>
-              <h3 className="text-2xl font-bold mb-1">
+              <h3 className="text-2xl font-medium mb-1 text-gray-900">
                 Rp {reportData.totalPenjualan.toLocaleString("id-ID")}
               </h3>
-              <p className="text-blue-100 text-sm">Total Penjualan</p>
+              <p className="text-xs text-gray-500">Total Penjualan</p>
             </div>
 
             {/* Total Transactions */}
-            <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg shadow-lg p-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-between mb-3">
-                <ShoppingBag className="w-8 h-8 opacity-80" />
-                <span className="text-xs font-semibold bg-white bg-opacity-20 px-2 py-1 rounded">
-                  TRANSAKSI
+                <ShoppingBag className="w-8 h-8 text-gray-400" />
+                <span className="text-xs font-medium text-gray-500 uppercase">
+                  Transaksi
                 </span>
               </div>
-              <h3 className="text-2xl font-bold mb-1">{reportData.totalTransaksi}</h3>
-              <p className="text-green-100 text-sm">Total Transaksi</p>
+              <h3 className="text-2xl font-medium mb-1 text-gray-900">{reportData.totalTransaksi}</h3>
+              <p className="text-xs text-gray-500">Total Transaksi</p>
             </div>
 
             {/* Retail Sales */}
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg shadow-lg p-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-between mb-3">
-                <TrendingUp className="w-8 h-8 opacity-80" />
-                <span className="text-xs font-semibold bg-white bg-opacity-20 px-2 py-1 rounded">
-                  ECERAN
+                <TrendingUp className="w-8 h-8 text-gray-400" />
+                <span className="text-xs font-medium text-gray-500 uppercase">
+                  Eceran
                 </span>
               </div>
-              <h3 className="text-2xl font-bold mb-1">
+              <h3 className="text-2xl font-medium mb-1 text-gray-900">
                 Rp {reportData.totalEceran.toLocaleString("id-ID")}
               </h3>
-              <p className="text-purple-100 text-sm">Penjualan Eceran</p>
+              <p className="text-xs text-gray-500">Penjualan Eceran</p>
             </div>
 
             {/* Wholesale Sales */}
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-lg shadow-lg p-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-between mb-3">
-                <TrendingUp className="w-8 h-8 opacity-80" />
-                <span className="text-xs font-semibold bg-white bg-opacity-20 px-2 py-1 rounded">
-                  GROSIR
+                <TrendingUp className="w-8 h-8 text-gray-400" />
+                <span className="text-xs font-medium text-gray-500 uppercase">
+                  Grosir
                 </span>
               </div>
-              <h3 className="text-2xl font-bold mb-1">
+              <h3 className="text-2xl font-medium mb-1 text-gray-900">
                 Rp {reportData.totalGrosir.toLocaleString("id-ID")}
               </h3>
-              <p className="text-orange-100 text-sm">Penjualan Grosir</p>
+              <p className="text-xs text-gray-500">Penjualan Grosir</p>
             </div>
           </div>
 
           {/* Average Transaction & Best Sellers */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Average Transaction */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Rata-rata per Transaksi</h3>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-base font-medium text-gray-900 mb-4">Rata-rata per Transaksi</h3>
               <div className="text-center py-8">
-                <div className="text-4xl font-bold text-blue-600 mb-2">
+                <div className="text-4xl font-medium text-gray-900 mb-2">
                   Rp {Math.round(reportData.rataRataTransaksi).toLocaleString("id-ID")}
                 </div>
-                <p className="text-gray-500">
+                <p className="text-sm text-gray-500">
                   Dari {reportData.totalTransaksi} transaksi
                 </p>
               </div>
             </div>
 
             {/* Best Sellers */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Produk Terlaris</h3>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-base font-medium text-gray-900 mb-4">Produk Terlaris</h3>
               {reportData.produkTerlaris.length > 0 ? (
                 <div className="space-y-3">
                   {reportData.produkTerlaris.map((product, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                        <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-medium text-sm">
                           {index + 1}
                         </div>
-                        <span className="font-medium text-gray-800">{product.name}</span>
+                        <span className="font-medium text-gray-900 text-sm">{product.name}</span>
                       </div>
-                      <span className="text-blue-600 font-bold">
+                      <span className="text-gray-900 font-medium text-sm">
                         {product.quantity} unit
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-8">Tidak ada data penjualan</p>
+                <p className="text-gray-400 text-center py-8 text-sm">Tidak ada data penjualan</p>
               )}
             </div>
           </div>
