@@ -29,10 +29,8 @@ export function InventoryManager({
     priceWholesale: "",
     priceModal: "",
     stock: "",
-    sku: "",
     barcode: "",
     category: "",
-    image: "",
   });
 
   // Get unique categories from existing products
@@ -45,10 +43,8 @@ export function InventoryManager({
       priceWholesale: "",
       priceModal: "",
       stock: "",
-      sku: "",
       barcode: "",
       category: "",
-      image: "",
     });
     setEditingId(null);
     setShowForm(false);
@@ -72,16 +68,21 @@ export function InventoryManager({
     // Use newCategoryName if adding new category
     const finalCategory = isAddingNewCategory ? newCategoryName : formData.category;
     
+    // Auto-generate SKU from category and timestamp
+    const autoSKU = editingId 
+      ? products.find(p => p.id === editingId)?.sku || `${finalCategory.substring(0, 3).toUpperCase()}-${Date.now()}`
+      : `${finalCategory.substring(0, 3).toUpperCase()}-${Date.now()}`;
+    
     const productData = {
       name: formData.name,
       priceRetail: parseFloat(formData.priceRetail),
       priceWholesale: parseFloat(formData.priceWholesale),
       priceModal: parseFloat(formData.priceModal) || 0,
       stock: parseInt(formData.stock),
-      sku: formData.sku,
+      sku: autoSKU,
       barcode: formData.barcode || "",
       category: finalCategory,
-      image: formData.image || `https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop`,
+      image: `https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop`,
     };
 
     if (editingId) {
@@ -100,10 +101,8 @@ export function InventoryManager({
       priceWholesale: (product.priceWholesale || product.price_wholesale || 0).toString(),
       priceModal: (product.priceModal || product.price_modal || 0).toString(),
       stock: product.stock.toString(),
-      sku: product.sku,
       barcode: product.barcode || "",
       category: product.category,
-      image: product.image || "",
     });
     setEditingId(product.id);
     setShowForm(true);
@@ -183,7 +182,6 @@ export function InventoryManager({
                 <td className="px-6 py-4">
                   <div className="flex flex-col">
                     <span className="font-medium text-gray-900">{product.name}</span>
-                    <span className="text-sm text-gray-500">SKU: {product.sku}</span>
                     {product.barcode && (
                       <span className="text-xs text-gray-400">Barcode: {product.barcode}</span>
                     )}
@@ -255,55 +253,43 @@ export function InventoryManager({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-1">SKU</label>
-                  <input
-                    type="text"
+              <div>
+                <label className="block text-sm font-semibold mb-1">Category</label>
+                {!isAddingNewCategory ? (
+                  <select
                     required
-                    value={formData.sku}
-                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                    value={formData.category}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1">Category</label>
-                  {!isAddingNewCategory ? (
-                    <select
+                  >
+                    <option value="">Pilih Kategori</option>
+                    {existingCategories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    <option value="__add_new__">+ Tambah Kategori Baru</option>
+                  </select>
+                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
                       required
-                      value={formData.category}
-                      onChange={(e) => handleCategoryChange(e.target.value)}
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Masukkan nama kategori baru"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAddingNewCategory(false);
+                        setNewCategoryName("");
+                      }}
+                      className="text-xs text-gray-600 hover:text-gray-900 underline"
                     >
-                      <option value="">Pilih Kategori</option>
-                      {existingCategories.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                      <option value="__add_new__">+ Tambah Kategori Baru</option>
-                    </select>
-                  ) : (
-                    <div className="space-y-2">
-                      <input
-                        type="text"
-                        required
-                        value={newCategoryName}
-                        onChange={(e) => setNewCategoryName(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Masukkan nama kategori baru"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsAddingNewCategory(false);
-                          setNewCategoryName("");
-                        }}
-                        className="text-xs text-gray-600 hover:text-gray-900 underline"
-                      >
-                        ← Kembali ke pilihan kategori
-                      </button>
-                    </div>
-                  )}
-                </div>
+                      ← Kembali ke pilihan kategori
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -365,17 +351,6 @@ export function InventoryManager({
                   onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="123456789012"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-1">Image URL (optional)</label>
-                <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://example.com/image.jpg"
                 />
               </div>
 
