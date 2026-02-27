@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Upload, Download, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import Papa from "papaparse";
 import { productsAPI } from "../../services/supabase";
+import { toast } from "sonner";
 
 interface CSVImportProps {
   onClose: () => void;
@@ -183,6 +184,21 @@ Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100`;
       failed: failedCount,
       errors: errors,
     });
+
+    // Show toast notifications
+    if (failedCount === 0 && successCount > 0) {
+      toast.success(`✅ Berhasil mengimport ${successCount} produk!`, {
+        duration: 4000,
+      });
+    } else if (successCount > 0 && failedCount > 0) {
+      toast.warning(`⚠️ Import selesai: ${successCount} berhasil, ${failedCount} gagal`, {
+        duration: 5000,
+      });
+    } else if (successCount === 0 && failedCount > 0) {
+      toast.error(`❌ Import gagal: ${failedCount} produk tidak dapat diimport`, {
+        duration: 5000,
+      });
+    }
 
     if (successCount > 0) {
       onSuccess();

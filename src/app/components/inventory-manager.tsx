@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus, Edit2, Trash2, Package, AlertTriangle, Upload, Download } from "lucide-react";
 import { Product } from "../types";
 import { CSVImport } from "./csv-import";
+import { toast } from "sonner";
 
 interface InventoryManagerProps {
   products: Product[];
@@ -85,13 +86,24 @@ export function InventoryManager({
       image: `https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop`,
     };
 
-    if (editingId) {
-      onUpdateProduct(editingId, productData);
-    } else {
-      onAddProduct(productData);
+    try {
+      if (editingId) {
+        onUpdateProduct(editingId, productData);
+        toast.success(`✅ Produk "${formData.name}" berhasil diupdate!`, {
+          duration: 3000,
+        });
+      } else {
+        onAddProduct(productData);
+        toast.success(`✅ Produk "${formData.name}" berhasil ditambahkan!`, {
+          duration: 3000,
+        });
+      }
+      resetForm();
+    } catch (error: any) {
+      toast.error(`❌ Gagal ${editingId ? 'update' : 'tambah'} produk: ${error.message}`, {
+        duration: 4000,
+      });
     }
-    
-    resetForm();
   };
 
   const handleEdit = (product: Product) => {
@@ -110,23 +122,48 @@ export function InventoryManager({
 
   const lowStockProducts = products.filter((p) => p.stock < 10);
 
-  const exportProductsToCSV = () => {
-    const csvHeader = "name,sku,barcode,category,retail_price,wholesale_price,modal_price,stock\n";
-    const csvContent = products
-      .map((product) => {
-        return `"${product.name}",${product.sku},${product.barcode || ""},${product.category},${product.priceRetail},${product.priceWholesale},${product.priceModal || 0},${product.stock}`;
-      })
-      .join("\n");
+  const handleDelete = async (productId: string, productName: string) => {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus produk "${productName}"?`)) {
+      try {
+        await onDeleteProduct(productId);
+        toast.success(`✅ Produk "${productName}" berhasil dihapus!`, {
+          duration: 3000,
+        });
+      } catch (error: any) {
+        toast.error(`❌ Gagal menghapus produk: ${error.message}`, {
+          duration: 4000,
+        });
+      }
+    }
+  };
 
-    const blob = new Blob([csvHeader + csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `data-produk-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const exportProductsToCSV = () => {
+    try {
+      const csvHeader = "name,sku,barcode,category,retail_price,wholesale_price,modal_price,stock\n";
+      const csvContent = products
+        .map((product) => {
+          return `"${product.name}",${product.sku},${product.barcode || ""},${product.category},${product.priceRetail},${product.priceWholesale},${product.priceModal || 0},${product.stock}`;
+        })
+        .join("\n");
+
+      const blob = new Blob([csvHeader + csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `data-produk-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`✅ Berhasil export ${products.length} produk ke CSV!`, {
+        duration: 3000,
+      });
+    } catch (error: any) {
+      toast.error(`❌ Gagal export CSV: ${error.message}`, {
+        duration: 4000,
+      });
+    }
   };
 
   return (
@@ -246,7 +283,7 @@ export function InventoryManager({
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => onDeleteProduct(product.id)}
+                      onClick={() => handleDelete(product.id, product.name)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded"
                     >
                       <Trash2 className="w-4 h-4" />

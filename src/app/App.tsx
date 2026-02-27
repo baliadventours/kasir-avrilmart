@@ -15,6 +15,7 @@ import { dbToFrontendProduct, frontendToDbProduct } from "../utils/helpers";
 import { useOfflineSync } from "./hooks/useOfflineSync";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { testDatabaseSchema, getDatabaseColumns } from "../utils/test-db-schema";
+import { Toaster } from "sonner";
 
 // Expose test functions to window for console access
 if (typeof window !== 'undefined') {
@@ -410,6 +411,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white flex">
+      {/* Toast Notifications */}
+      <Toaster position="top-right" richColors closeButton />
+
       {/* PWA Prompt */}
       <PWAPrompt />
 
