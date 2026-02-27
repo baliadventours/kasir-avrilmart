@@ -1,5 +1,25 @@
 # 🚀 Quick Database Setup - Start Here!
 
+## ⚡ AvrilMart - Complete Setup (RECOMMENDED)
+
+### **Use This For Fresh Installation** ✅
+```
+File: SETUP_AVRILMART_COMPLETE.sql
+
+What you get:
+✅ All 5 tables created
+✅ 12 categories inserted
+✅ 35 sample products with barcodes
+✅ Full security (RLS)
+✅ All triggers & indexes
+✅ Ready to use in 5 minutes!
+```
+
+📖 **Detailed Guide:** See [SETUP_AVRILMART_GUIDE.md](SETUP_AVRILMART_GUIDE.md)
+🎯 **Visual Guide:** See [VISUAL_GUIDE.md](VISUAL_GUIDE.md)
+
+---
+
 ## ⚡ Fastest Way (5 Minutes)
 
 ### **Step 1: Open Supabase SQL Editor**
