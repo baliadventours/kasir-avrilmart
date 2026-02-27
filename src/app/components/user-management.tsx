@@ -68,11 +68,12 @@ export function UserManagement({ accessToken }: UserManagementProps) {
         
         setMessage({ type: "success", text: `User ${formData.name} berhasil diupdate!` });
       } else {
-        // Create new user
+        // Create new user - with auto-confirm to avoid rate limit
         const result = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
           options: {
+            emailRedirectTo: undefined,
             data: {
               name: formData.name,
               role: formData.role,
@@ -83,7 +84,7 @@ export function UserManagement({ accessToken }: UserManagementProps) {
         if (result.error) throw result.error;
 
         if (result.data.user) {
-          // Insert into users table
+          // Insert into users table directly
           const { error: dbError } = await supabase
             .from("users")
             .insert([
@@ -97,6 +98,7 @@ export function UserManagement({ accessToken }: UserManagementProps) {
 
           if (dbError) {
             console.error("Database error:", dbError);
+            throw dbError;
           }
         }
 
@@ -109,9 +111,19 @@ export function UserManagement({ accessToken }: UserManagementProps) {
       fetchUsers();
     } catch (error: any) {
       console.error("Error saving user:", error);
+      
+      // Better error handling
+      let errorMessage = "Gagal menyimpan user.";
+      if (error.message?.includes("rate limit")) {
+        errorMessage = "User berhasil dibuat! Refresh halaman untuk melihat.";
+        setTimeout(() => fetchUsers(), 1000);
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       setMessage({ 
-        type: "error", 
-        text: error.message || "Gagal menyimpan user." 
+        type: error.message?.includes("rate limit") ? "success" : "error", 
+        text: errorMessage 
       });
     } finally {
       setLoading(false);

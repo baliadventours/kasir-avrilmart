@@ -4,6 +4,7 @@ import { InventoryManager } from "./components/inventory-manager";
 import { SalesHistory } from "./components/sales-history";
 import { Login } from "./components/login";
 import { UserManagement } from "./components/user-management";
+import { CategoryManager } from "./components/category-manager";
 import { Sidebar } from "./components/sidebar";
 import { Reports } from "./components/reports";
 import { Product, CartItem, Sale } from "./types";
@@ -18,7 +19,7 @@ interface UserData {
 }
 
 export default function App() {
-  const [activeMenu, setActiveMenu] = useState<"pos" | "inventory" | "sales" | "reports" | "users">("pos");
+  const [activeMenu, setActiveMenu] = useState<"pos" | "inventory" | "sales" | "reports" | "users" | "categories">("pos");
   const [user, setUser] = useState<UserData | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -327,6 +328,7 @@ export default function App() {
           {activeMenu === "users" && canAccessUsers && (
             <UserManagement accessToken={accessToken || ""} />
           )}
+          {activeMenu === "categories" && <CategoryManager />}
         </main>
       </div>
     </div>
