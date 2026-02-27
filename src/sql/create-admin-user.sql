@@ -1,11 +1,24 @@
 -- =====================================================
 -- CREATE ADMIN USER - SIMPLE METHOD
 -- =====================================================
+-- IMPORTANT: Jangan signup via aplikasi (bisa error RLS)
 -- Cara pakai:
--- 1. Signup via aplikasi dengan email & password
--- 2. Confirm email (check inbox)
--- 3. Copy User ID dari Supabase Dashboard
--- 4. Run script ini dengan User ID tersebut
+-- 1. Create user via Supabase Dashboard (lihat STEP 0)
+-- 2. Run script ini untuk set role
+-- =====================================================
+
+-- =====================================================
+-- STEP 0: Create User via Supabase Dashboard
+-- =====================================================
+-- 1. Buka Supabase Dashboard → Authentication → Users
+-- 2. Klik "Add User" → "Create new user"
+-- 3. Isi:
+--    - Email: admin@avrilmart.com
+--    - Password: admin123 (atau password lain)
+--    - Auto Confirm User: ✅ HARUS ON!
+-- 4. Klik "Create User"
+-- 5. User akan muncul di list
+-- 6. Lanjut ke OPTION 2 di bawah
 -- =====================================================
 
 -- =====================================================

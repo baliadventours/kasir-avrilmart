@@ -59,17 +59,34 @@ export function UserManagement({ accessToken }: UserManagementProps) {
           .from("users")
           .update({
             name: formData.name,
-            email: formData.email,
             role: formData.role,
           })
           .eq("id", editingUser.id);
 
         if (updateError) throw updateError;
+
+        // Also update auth metadata
+        // Note: This only works if user has admin privileges
+        try {
+          const { data: authUser } = await supabase.auth.getUser();
+          if (authUser.user?.user_metadata?.role === 'admin') {
+            // Update in auth.users metadata
+            await supabase.rpc('update_user_metadata', {
+              user_id: editingUser.id,
+              metadata: {
+                name: formData.name,
+                role: formData.role
+              }
+            });
+          }
+        } catch (e) {
+          console.warn('Could not update auth metadata:', e);
+        }
         
         setMessage({ type: "success", text: `User ${formData.name} berhasil diupdate!` });
       } else {
-        // Create new user - with auto-confirm to avoid rate limit
-        const result = await supabase.auth.signUp({
+        // Create new user via auth
+        const signUpResult = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
           options: {
@@ -81,15 +98,26 @@ export function UserManagement({ accessToken }: UserManagementProps) {
           },
         });
 
-        if (result.error) throw result.error;
+        if (signUpResult.error) {
+          // Check if it's because email confirmation is required
+          if (signUpResult.error.message?.includes('Email') || signUpResult.error.message?.includes('rate limit')) {
+            setMessage({ 
+              type: "error", 
+              text: `Tidak bisa create user otomatis. Silakan create manual via Supabase Dashboard. Lihat petunjuk di bawah.` 
+            });
+            setShowForm(false);
+            return;
+          }
+          throw signUpResult.error;
+        }
 
-        if (result.data.user) {
-          // Insert into users table directly
+        // If signup successful, add to users table
+        if (signUpResult.data.user) {
           const { error: dbError } = await supabase
             .from("users")
             .insert([
               {
-                id: result.data.user.id,
+                id: signUpResult.data.user.id,
                 name: formData.name,
                 email: formData.email,
                 role: formData.role,
@@ -97,34 +125,41 @@ export function UserManagement({ accessToken }: UserManagementProps) {
             ]);
 
           if (dbError) {
-            console.error("Database error:", dbError);
-            throw dbError;
+            console.error("Database insert error:", dbError);
+            setMessage({ 
+              type: "success", 
+              text: `User berhasil dibuat di Auth, tapi gagal sync ke database. User tetap bisa login. Refresh halaman untuk melihat.` 
+            });
+          } else {
+            setMessage({ type: "success", text: `User ${formData.name} berhasil dibuat!` });
           }
         }
-
-        setMessage({ type: "success", text: `User ${formData.name} berhasil dibuat!` });
       }
 
       setFormData({ name: "", email: "", password: "", role: "cashier" });
       setShowForm(false);
       setEditingUser(null);
-      fetchUsers();
+      
+      // Reload users after a short delay
+      setTimeout(() => fetchUsers(), 1000);
+      
     } catch (error: any) {
       console.error("Error saving user:", error);
       
-      // Better error handling
       let errorMessage = "Gagal menyimpan user.";
-      if (error.message?.includes("rate limit")) {
-        errorMessage = "User berhasil dibuat! Refresh halaman untuk melihat.";
-        setTimeout(() => fetchUsers(), 1000);
+      
+      if (error.message?.includes('rate limit') || error.message?.includes('Email')) {
+        errorMessage = "Tidak bisa create user otomatis. Gunakan metode manual di bawah.";
+        setMessage({ type: "error", text: errorMessage });
+        setShowForm(false);
+      } else if (error.message?.includes('duplicate') || error.message?.includes('already exists')) {
+        errorMessage = "Email sudah terdaftar. Gunakan email lain.";
+        setMessage({ type: "error", text: errorMessage });
       } else if (error.message) {
         errorMessage = error.message;
+        setMessage({ type: "error", text: errorMessage });
       }
       
-      setMessage({ 
-        type: error.message?.includes("rate limit") ? "success" : "error", 
-        text: errorMessage 
-      });
     } finally {
       setLoading(false);
     }
@@ -307,6 +342,56 @@ export function UserManagement({ accessToken }: UserManagementProps) {
             <li>• Lihat stok produk</li>
             <li>• Tidak bisa edit inventory</li>
           </ul>
+        </div>
+      </div>
+
+      {/* Manual Creation Guide */}
+      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg">
+        <h3 className="font-bold text-yellow-900 mb-3 text-lg flex items-center gap-2">
+          <span>⚠️</span> Jika Tombol "Tambah User" Tidak Bekerja
+        </h3>
+        <p className="text-yellow-800 text-sm mb-4">
+          Untuk keamanan, Supabase membatasi pembuatan user dari client-side. 
+          Jika Anda mengalami error, gunakan metode manual berikut:
+        </p>
+        
+        <div className="bg-white p-4 rounded border border-yellow-300 space-y-3">
+          <div>
+            <p className="font-semibold text-gray-900 text-sm mb-2">📍 Metode 1: Via Supabase Dashboard</p>
+            <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
+              <li>Buka Supabase Dashboard → Authentication → Users</li>
+              <li>Klik "Add User" → "Create new user"</li>
+              <li>Isi Email, Password, dan <strong>Auto Confirm: ON</strong></li>
+              <li>Setelah created, klik user → Edit metadata</li>
+              <li>Tambahkan: <code className="bg-gray-100 px-2 py-1 rounded">{"{ \"name\": \"Kasir 1\", \"role\": \"cashier\" }"}</code></li>
+            </ol>
+          </div>
+
+          <div>
+            <p className="font-semibold text-gray-900 text-sm mb-2">📍 Metode 2: Via SQL Editor</p>
+            <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
+              <li>Create user via Dashboard (step 1-3 di atas)</li>
+              <li>Buka SQL Editor, copy query ini:</li>
+            </ol>
+            <div className="bg-gray-900 text-gray-100 p-3 rounded mt-2 text-xs font-mono overflow-x-auto">
+              {`-- Set role untuk user baru
+UPDATE auth.users
+SET raw_user_meta_data = jsonb_build_object(
+  'name', 'Kasir 1',
+  'role', 'cashier'
+)
+WHERE email = 'kasir1@example.com';
+
+-- Tambahkan ke users table
+INSERT INTO public.users (id, name, email, role)
+SELECT id, 'Kasir 1', email, 'cashier'
+FROM auth.users
+WHERE email = 'kasir1@example.com';`}
+            </div>
+            <p className="text-xs text-gray-600 mt-2">
+              💡 Ganti email dan name sesuai user yang baru dibuat
+            </p>
+          </div>
         </div>
       </div>
 

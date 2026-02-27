@@ -24,25 +24,40 @@
 
 ### **STEP 2: Setup Admin User**
 
+### **🔧 FIX DULU: Jika Error "Infinite Recursion"**
+
+**Run query ini di SQL Editor:**
+
+```sql
+-- Fix RLS error di auth.users table
+ALTER TABLE auth.users DISABLE ROW LEVEL SECURITY;
+```
+
+**📝 Full fix:** `/src/sql/fix-auth-error.sql`
+
+---
+
 **⭐ CARA MUDAH (RECOMMENDED) ⭐**
 
-**A. Signup via Aplikasi:**
+**A. Create User via Supabase Dashboard:**
 
-1. Di aplikasi, klik **Sign Up**
-2. Isi:
+**⚠️ JANGAN signup via aplikasi (bisa error)!**
+
+1. Buka **Supabase Dashboard → Authentication → Users**
+2. Klik **Add User** → **Create new user**
+3. Isi:
    ```
    Email: admin@avrilmart.com
-   Password: [password Anda]
-   Name: Admin AvrilMart
+   Password: admin123
+   Auto Confirm User: ✅ HARUS ON!
    ```
-3. **Confirm email** (cek inbox/spam)
-4. Jangan login dulu!
+4. Klik **Create User**
+5. User akan muncul di list
 
 **B. Set Role via SQL:**
 
 1. Buka **Supabase Dashboard → SQL Editor**
-2. Buka file: `/src/sql/create-admin-user.sql`
-3. Copy query **OPTION 2** (Update by Email):
+2. Copy query **OPTION 2** (Update by Email):
    ```sql
    UPDATE auth.users
    SET raw_user_meta_data = jsonb_build_object(
@@ -51,8 +66,8 @@
    )
    WHERE email = 'admin@avrilmart.com';
    ```
-4. Paste ke SQL Editor dan **RUN**
-5. **Verify** dengan query ini:
+3. Paste ke SQL Editor dan **RUN**
+4. **Verify** dengan query ini:
    ```sql
    SELECT email, raw_user_meta_data 
    FROM auth.users 
@@ -67,18 +82,7 @@
 
 ---
 
-**🔧 ALTERNATIVE: Create User via Dashboard**
-
-1. **Supabase → Authentication → Users**
-2. Klik **Add User** → **Create new user**
-3. Isi:
-   ```
-   Email: admin@avrilmart.com
-   Password: [password Anda]
-   Auto Confirm User: ✅ ON (Important!)
-   ```
-4. **Create User**
-5. **Update metadata via SQL** (step B di atas)
+**📝 File lengkap:** `/src/sql/create-admin-user.sql`
 
 ---
 

@@ -25,27 +25,50 @@
 
 ## **STEP 2: Create Admin User (2 menit)**
 
-### **A. Signup via Aplikasi:**
+### **🔧 FIX: Jika Ada Error "Infinite Recursion"**
 
-1. Buka aplikasi
-2. Klik **Sign Up**
-3. Isi form:
+**Run ini DULU di SQL Editor:**
+
+```sql
+-- Fix RLS error
+ALTER TABLE auth.users DISABLE ROW LEVEL SECURITY;
+
+-- Verify fixed
+SELECT tablename, rowsecurity 
+FROM pg_tables 
+WHERE schemaname = 'auth' AND tablename = 'users';
+-- Should show: rowsecurity = false
+```
+
+**📝 Full fix script:** `/src/sql/fix-auth-error.sql`
+
+---
+
+### **A. Create User via Supabase Dashboard:**
+
+**⚠️ JANGAN signup via aplikasi (bisa error)! Use Dashboard:**
+
+1. Buka **Supabase Dashboard**
+2. Klik **Authentication → Users**
+3. Klik **Add User** → **Create new user**
+4. Isi form:
    ```
    Email: admin@avrilmart.com
-   Password: admin123 (atau password lain)
-   Name: Admin AvrilMart
+   Password: admin123
+   Auto Confirm User: ✅ HARUS ON!
    ```
-4. Submit
-5. **Cek email untuk confirm** (check spam juga!)
-6. Klik link confirmation
-7. **Jangan login dulu!**
+5. Klik **Create User**
+6. User akan muncul di list
+
+**✅ User created**
 
 ---
 
 ### **B. Set Role Admin via SQL:**
 
-1. Kembali ke **Supabase → SQL Editor**
-2. Copy query ini:
+1. Tetap di **Supabase → SQL Editor**
+2. Klik **New query**
+3. Copy query ini:
    ```sql
    UPDATE auth.users
    SET raw_user_meta_data = jsonb_build_object(
@@ -54,14 +77,14 @@
    )
    WHERE email = 'admin@avrilmart.com';
    ```
-3. Paste dan **RUN**
-4. Verify dengan query ini:
+4. Paste dan **RUN**
+5. Verify dengan query ini:
    ```sql
    SELECT email, raw_user_meta_data 
    FROM auth.users 
    WHERE email = 'admin@avrilmart.com';
    ```
-5. Pastikan muncul: `{"name": "Admin AvrilMart", "role": "admin"}`
+6. Pastikan muncul: `{"name": "Admin AvrilMart", "role": "admin"}`
 
 **✅ Done! Admin user ready**
 
