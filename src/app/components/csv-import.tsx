@@ -17,7 +17,6 @@ interface ProductCSVRow {
   wholesale_price: string | number;
   modal_price?: string | number;
   stock: string | number;
-  image_url?: string;
 }
 
 interface ValidationResult {
@@ -155,6 +154,9 @@ Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100`;
           modal_price: row.modal_price ? parseFloat(row.modal_price.toString()) : null,
           stock: parseInt(row.stock.toString()),
         };
+        
+        // Debug: Log data being sent (remove after testing)
+        console.log(`Importing product ${i+1}:`, productData);
         
         await productsAPI.create(productData);
         successCount++;
