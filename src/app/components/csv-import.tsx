@@ -155,14 +155,23 @@ Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100`;
           stock: parseInt(row.stock.toString()),
         };
         
-        // Debug: Log data being sent (remove after testing)
-        console.log(`Importing product ${i+1}:`, productData);
+        // Debug: Log data being sent
+        console.log(`Importing product ${i+1}/${validation.data.length}:`, productData);
         
         await productsAPI.create(productData);
         successCount++;
       } catch (error: any) {
         failedCount++;
-        errors.push(`Row ${i + 2} (${row.name}): ${error.message}`);
+        // Detailed error logging
+        console.error(`Error importing row ${i + 2}:`, error);
+        console.error('Error details:', {
+          message: error.message,
+          hint: error.hint,
+          details: error.details,
+          code: error.code,
+          row: row
+        });
+        errors.push(`Row ${i + 2} (${row.name}): ${error.message || error.hint || 'Unknown error'}`);
       }
     }
 

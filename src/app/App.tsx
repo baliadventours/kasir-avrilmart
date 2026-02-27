@@ -14,6 +14,13 @@ import { productsAPI, salesAPI, authAPI } from "../services/supabase";
 import { dbToFrontendProduct, frontendToDbProduct } from "../utils/helpers";
 import { useOfflineSync } from "./hooks/useOfflineSync";
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import { testDatabaseSchema, getDatabaseColumns } from "../utils/test-db-schema";
+
+// Expose test functions to window for console access
+if (typeof window !== 'undefined') {
+  (window as any).testDatabaseSchema = testDatabaseSchema;
+  (window as any).getDatabaseColumns = getDatabaseColumns;
+}
 
 interface UserData {
   id: string;
