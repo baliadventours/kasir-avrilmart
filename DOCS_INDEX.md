@@ -28,7 +28,7 @@ Selamat datang di dokumentasi lengkap aplikasi POS & Inventory Management System
 
 - **[README.md](./README.md)**
   - Project overview
-  - Features list
+  - Features list (with CSV Import & Thermal Receipt)
   - Tech stack
   - Quick start commands
 
@@ -43,6 +43,12 @@ Selamat datang di dokumentasi lengkap aplikasi POS & Inventory Management System
   - Tables, views, triggers
   - RLS policies
   - Sample data
+
+- **[✨ Features Guide](./FEATURES_GUIDE.md)** ⭐ NEW
+  - CSV Import walkthrough
+  - Thermal Receipt setup
+  - Configuration options
+  - Troubleshooting
 
 ### For Administrators
 

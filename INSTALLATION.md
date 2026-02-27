@@ -417,23 +417,45 @@ https://pos-inventory-xxxxx.vercel.app
 1. **Click on the user** you just created
    - Will open user details
 
-2. **Scroll down** to **"User Metadata"** section
+2. **Scroll down** to **"Raw User Meta Data"** section
+   - NOT "User Metadata" - look for "Raw User Meta Data"
 
-3. **Click "Edit"** button
+3. **Click "Edit" icon** (pencil icon on the right)
 
 4. **Replace content** with:
 ```json
 {
+  "email_verified": true,
   "name": "Administrator",
   "role": "admin"
 }
 ```
 
+**⚠️ IMPORTANT**: 
+- Keep `"email_verified": true` jika sudah ada
+- Add `"name"` and `"role"` fields
+- Make sure JSON syntax valid (commas, quotes)
+
 5. **Click "Save"**
 
 ✅ **Verification:**
-- User Metadata now shows `name` and `role`
+- Raw User Meta Data now shows `name` and `role`
 - `role` = `"admin"`
+
+**🔧 Alternative: If UI edit doesn't work**
+
+Use SQL Editor instead:
+```sql
+UPDATE auth.users
+SET raw_user_meta_data = jsonb_build_object(
+  'email_verified', true,
+  'name', 'Administrator',
+  'role', 'admin'
+)
+WHERE email = 'admin@toko.com';
+```
+
+See `/update-user-metadata.sql` for more options.
 
 🎉 **Admin user ready!**
 

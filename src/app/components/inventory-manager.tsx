@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, Package, AlertTriangle } from "lucide-react";
+import { Plus, Edit2, Trash2, Package, AlertTriangle, Upload } from "lucide-react";
 import { Product } from "../types";
+import { CSVImport } from "./csv-import";
 
 interface InventoryManagerProps {
   products: Product[];
   onAddProduct: (product: Omit<Product, "id">) => void;
   onUpdateProduct: (id: string, product: Partial<Product>) => void;
   onDeleteProduct: (id: string) => void;
+  onRefresh: () => void;
 }
 
 export function InventoryManager({
@@ -14,8 +16,10 @@ export function InventoryManager({
   onAddProduct,
   onUpdateProduct,
   onDeleteProduct,
+  onRefresh,
 }: InventoryManagerProps) {
   const [showForm, setShowForm] = useState(false);
+  const [showCSVImport, setShowCSVImport] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -87,13 +91,22 @@ export function InventoryManager({
           <h2 className="text-2xl font-bold">Inventory Management</h2>
           <p className="text-gray-500">Manage your products and stock levels</p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Add Product
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowCSVImport(true)}
+            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 flex items-center gap-2"
+          >
+            <Upload className="w-5 h-5" />
+            Import CSV
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Add Product
+          </button>
+        </div>
       </div>
 
       {/* Low Stock Alert */}
@@ -307,6 +320,17 @@ export function InventoryManager({
             </form>
           </div>
         </div>
+      )}
+
+      {/* CSV Import Modal */}
+      {showCSVImport && (
+        <CSVImport
+          onClose={() => setShowCSVImport(false)}
+          onSuccess={() => {
+            setShowCSVImport(false);
+            onRefresh();
+          }}
+        />
       )}
     </div>
   );

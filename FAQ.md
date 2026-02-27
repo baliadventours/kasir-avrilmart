@@ -56,7 +56,31 @@ Ya! Keamanan data dijaga dengan:
 
 1. Supabase → Authentication → Users
 2. Add user (email + password)
-3. Set metadata: `{"name": "...", "role": "admin"}`
+3. ✅ Check "Auto Confirm User"
+4. Click user → Scroll to **"Raw User Meta Data"**
+5. Click Edit icon (pencil)
+6. Set metadata: 
+   ```json
+   {
+     "email_verified": true,
+     "name": "Administrator",
+     "role": "admin"
+   }
+   ```
+7. Save
+
+**🔧 Alternative via SQL** (if UI doesn't work):
+```sql
+UPDATE auth.users
+SET raw_user_meta_data = jsonb_build_object(
+  'email_verified', true,
+  'name', 'Administrator',
+  'role', 'admin'
+)
+WHERE email = 'your-email@example.com';
+```
+
+Run in Supabase → SQL Editor
 
 Setelah itu, admin bisa create user via aplikasi.
 

@@ -1,0 +1,11 @@
+name,sku,category,retail_price,wholesale_price,stock,image_url
+Wireless Headphones,WH-001,Electronics,150000,120000,50,https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop
+Smart Watch,SW-002,Electronics,500000,450000,30,https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop
+Coffee Mug,CM-003,Kitchenware,50000,40000,100,https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=300&h=300&fit=crop
+Notebook Set,NB-004,Stationery,75000,60000,80,https://images.unsplash.com/photo-1581304271875-fa76c5df7be1?w=300&h=300&fit=crop
+Desk Lamp,DL-005,Furniture,200000,180000,40,https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=300&h=300&fit=crop
+Water Bottle,WB-006,Kitchenware,35000,28000,120,https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300&h=300&fit=crop
+Backpack,BP-007,Bags,250000,220000,60,https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop
+USB Cable,UC-008,Electronics,25000,20000,200,https://images.unsplash.com/photo-1591290619762-3e7f1c165f97?w=300&h=300&fit=crop
+Mouse Pad,MP-009,Electronics,45000,35000,90,https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&h=300&fit=crop
+Phone Stand,PS-010,Accessories,80000,70000,75,https://images.unsplash.com/photo-1556656793-08538906a9f8?w=300&h=300&fit=crop

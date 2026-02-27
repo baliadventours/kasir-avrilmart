@@ -4,46 +4,33 @@ Modern Point of Sale and Inventory Management application built with React, Vite
 
 ![POS System](https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop)
 
-## ✨ Features
+## ✨ Key Features
 
-### 🔐 Authentication & Authorization
-- **Role-based access control** (Admin & Kasir)
-- **No public signup** - Only admin can create users
-- Supabase Auth integration
-- Session persistence
-- Secure login/logout
-- First admin created via Supabase Dashboard
-
-### 💳 Point of Sale
+### 🛒 Point of Sale (POS)
+- **Dual Pricing System**: Harga Eceran (Retail) & Harga Grosir (Wholesale)
 - Real-time cart management
-- **Dual pricing** (Harga Eceran & Harga Grosir)
-- **Barcode scanner support** (USB/Bluetooth)
+- **Barcode scanning support**
 - Product search & filtering
 - Tax calculation (10%)
-- Payment processing with change calculation
-- Live stock availability
+- Payment processing dengan kalkulasi kembalian
+- **Thermal receipt printing** (80mm optimized)
+- Transaction history
 
 ### 📦 Inventory Management (Admin Only)
-- Add, edit, and delete products
-- Dual pricing configuration
-- Stock level tracking
-- **Low stock alerts** (≤10 units)
-- Category management
-- SKU/Barcode management
-- Product images
+- Add, edit, delete products
+- **CSV bulk import** - Import ratusan produk sekaligus
+- Stock level tracking dengan color-coded indicators
+- Low stock alerts (automatic badges)
+- Product categorization
+- Dual price management (retail & wholesale)
+- Image support via URL
 
-### 📊 Sales History (Admin Only)
-- Transaction history
-- Revenue analytics
-- Daily/weekly/monthly reports
-- Sales by pricing type
-- Export capabilities
-
-### 👥 User Management (Admin Only)
-- Create cashier accounts
-- Create admin accounts
-- Role assignment
-- User metadata management
+### 📊 Sales Analytics (Admin Only)
+- Complete sales history
+- Revenue tracking by price type (Eceran vs Grosir)
+- Transaction details dengan item breakdown
+- User activity tracking (who processed each sale)
+- Real-time synchronization dengan database
 
 ## 🚀 Quick Start
 

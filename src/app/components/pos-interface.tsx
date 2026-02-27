@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ShoppingCart, Plus, Minus, Trash2, CreditCard, DollarSign, Scan } from "lucide-react";
 import { Product, CartItem } from "../types";
+import { ThermalReceipt } from "./thermal-receipt";
 
 interface POSInterfaceProps {
   products: Product[];
@@ -15,6 +16,8 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
   const [priceType, setPriceType] = useState<"retail" | "wholesale">("retail");
   const [barcodeInput, setBarcodeInput] = useState("");
   const [scanMessage, setScanMessage] = useState("");
+  const [lastSale, setLastSale] = useState<any>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
   const barcodeInputRef = useRef<HTMLInputElement>(null);
 
   const availableProducts = products.filter((p) => p.stock > 0);
@@ -103,10 +106,26 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
   const completeSale = () => {
     const payment = parseFloat(paymentAmount);
     if (payment >= total) {
+      // Prepare sale data for receipt
+      const saleData = {
+        id: Date.now().toString(), // Temporary ID
+        total: total,
+        payment_type: priceType,
+        created_at: new Date().toISOString(),
+        items: cart.map(item => ({
+          product_name: item.name,
+          quantity: item.quantity,
+          price: item.appliedPrice,
+          total: item.appliedPrice * item.quantity
+        }))
+      };
+
       onSale(cart, total, priceType, payment);
+      setLastSale(saleData);
       setCart([]);
       setShowCheckout(false);
       setPaymentAmount("");
+      setShowReceipt(true);
     }
   };
 
@@ -361,6 +380,14 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Thermal Receipt */}
+      {showReceipt && lastSale && (
+        <ThermalReceipt
+          sale={lastSale}
+          onClose={() => setShowReceipt(false)}
+        />
       )}
     </div>
   );

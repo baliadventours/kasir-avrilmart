@@ -394,6 +394,7 @@ export default function App() {
             onAddProduct={handleAddProduct}
             onUpdateProduct={handleUpdateProduct}
             onDeleteProduct={handleDeleteProduct}
+            onRefresh={loadProducts}
           />
         )}
         {activeTab === "sales" && canAccessSales && <SalesHistory sales={sales} />}
