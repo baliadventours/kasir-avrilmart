@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, Package, AlertTriangle, Upload, Download } from "lucide-react";
+import { Plus, Edit2, Trash2, Package, AlertTriangle, Upload, Download, Search, Scan } from "lucide-react";
 import { Product } from "../types";
 import { CSVImport } from "./csv-import";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ export function InventoryManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAddingNewCategory, setIsAddingNewCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     priceRetail: "",
@@ -122,6 +123,17 @@ export function InventoryManager({
 
   const lowStockProducts = products.filter((p) => p.stock < 10);
 
+  // Filter products based on search term
+  const filteredProducts = products.filter((product) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      product.name.toLowerCase().includes(searchLower) ||
+      product.sku.toLowerCase().includes(searchLower) ||
+      (product.barcode && product.barcode.toLowerCase().includes(searchLower)) ||
+      product.category.toLowerCase().includes(searchLower)
+    );
+  });
+
   const handleDelete = async (productId: string, productName: string) => {
     if (window.confirm(`Apakah Anda yakin ingin menghapus produk "${productName}"?`)) {
       try {
@@ -201,6 +213,35 @@ export function InventoryManager({
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="px-6">
+        <div className="bg-white border-2 border-[#E05D43] rounded-lg p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Cari Produk (Nama, SKU, Barcode, atau Kategori)..."
+                className="w-full pl-12 pr-12 py-3 text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E05D43] focus:border-transparent"
+              />
+              <Scan className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#E05D43] w-5 h-5" />
+            </div>
+            {searchTerm && (
+              <div className="flex items-center gap-2 bg-[#E05D43] text-white px-4 py-3 rounded-lg">
+                <span className="font-medium">{filteredProducts.length} hasil</span>
+              </div>
+            )}
+          </div>
+          {searchTerm && filteredProducts.length === 0 && (
+            <div className="mt-3 text-center text-gray-500 text-sm">
+              Tidak ada produk yang cocok dengan pencarian "{searchTerm}"
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Low Stock Alert */}
       {lowStockProducts.length > 0 && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -240,7 +281,7 @@ export function InventoryManager({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <tr key={product.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="flex flex-col">
