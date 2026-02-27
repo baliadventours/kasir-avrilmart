@@ -7,9 +7,12 @@ import { UserManagement } from "./components/user-management";
 import { CategoryManager } from "./components/category-manager";
 import { Sidebar } from "./components/sidebar";
 import { Reports } from "./components/reports";
+import { OfflineIndicator } from "./components/offline-indicator";
 import { Product, CartItem, Sale } from "./types";
 import { productsAPI, salesAPI, authAPI } from "../services/supabase";
 import { dbToFrontendProduct, frontendToDbProduct } from "../utils/helpers";
+import { useOfflineSync } from "./hooks/useOfflineSync";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
 interface UserData {
   id: string;
@@ -32,6 +35,10 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Offline sync hooks
+  const offlineSync = useOfflineSync();
+  const localStorage = useLocalStorage();
+
   // Check for existing session on mount
   useEffect(() => {
     checkSession();
@@ -44,6 +51,26 @@ export default function App() {
       loadSales();
     }
   }, [user]);
+
+  // Auto-sync when going online
+  useEffect(() => {
+    if (offlineSync.isOnline && user) {
+      handleAutoSync();
+    }
+  }, [offlineSync.isOnline, user]);
+
+  // Save to localStorage whenever products/sales change
+  useEffect(() => {
+    if (products.length > 0) {
+      localStorage.saveProducts(products);
+    }
+  }, [products]);
+
+  useEffect(() => {
+    if (sales.length > 0) {
+      localStorage.saveSales(sales);
+    }
+  }, [sales]);
 
   const checkSession = async () => {
     try {
@@ -219,6 +246,39 @@ export default function App() {
   ) => {
     if (!user) return;
 
+    // Update stock optimistically (in memory)
+    const updatedProducts = products.map(product => {
+      const soldItem = items.find(item => item.id === product.id);
+      if (soldItem) {
+        return { ...product, stock: product.stock - soldItem.quantity };
+      }
+      return product;
+    });
+    setProducts(updatedProducts);
+
+    // Create temporary sale for immediate UI feedback
+    const tempSale: Sale = {
+      id: `temp_${Date.now()}`,
+      date: new Date().toISOString(),
+      items,
+      total,
+      priceType,
+    };
+    setSales([tempSale, ...sales]);
+
+    // If offline, queue the transaction
+    if (!offlineSync.isOnline) {
+      offlineSync.addToQueue('sale', {
+        items,
+        total,
+        priceType,
+        paymentAmount,
+      });
+      console.log('📡 Offline mode: Transaction queued for sync');
+      return; // Exit early, will sync when online
+    }
+
+    // If online, try to sync immediately
     try {
       setLoading(true);
 
@@ -234,10 +294,10 @@ export default function App() {
       // Create sale in database
       const { sale } = await salesAPI.create(user.id, saleItems, priceType, paymentAmount);
 
-      // Reload products to get updated stock
+      // Reload products to get updated stock from server
       await loadProducts();
 
-      // Add to local sales state
+      // Replace temp sale with real sale
       const newSale: Sale = {
         id: sale.id,
         date: sale.created_at,
@@ -245,13 +305,74 @@ export default function App() {
         total: sale.total,
         priceType: sale.price_type,
       };
-      setSales([newSale, ...sales]);
+      setSales([newSale, ...sales.filter(s => s.id !== tempSale.id)]);
 
       setError(null);
     } catch (error: any) {
       console.error("Error processing sale:", error);
-      setError("Gagal proses penjualan: " + error.message);
-      throw error;
+      
+      // If error, queue for later
+      offlineSync.addToQueue('sale', {
+        items,
+        total,
+        priceType,
+        paymentAmount,
+      });
+      
+      setError("Koneksi bermasalah. Transaksi akan disinkronkan otomatis.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAutoSync = async () => {
+    try {
+      setLoading(true);
+
+      // Sync products
+      const dbProducts = await productsAPI.getAll();
+      const frontendProducts = dbProducts.map(dbToFrontendProduct);
+      setProducts(frontendProducts);
+
+      // Sync sales
+      const dbSales = await salesAPI.getAll();
+      
+      // Convert to frontend format
+      const frontendSales: Sale[] = await Promise.all(
+        dbSales.map(async (sale) => {
+          const { items } = await salesAPI.getWithItems(sale.id);
+          
+          const cartItems: CartItem[] = items.map((item) => ({
+            id: item.product_id,
+            name: item.product_name,
+            sku: item.product_sku,
+            priceRetail: item.price,
+            priceWholesale: item.price,
+            price_retail: item.price,
+            price_wholesale: item.price,
+            stock: 0,
+            category: "",
+            quantity: item.quantity,
+            priceType: sale.price_type,
+            appliedPrice: item.price,
+          }));
+
+          return {
+            id: sale.id,
+            date: sale.created_at,
+            items: cartItems,
+            total: sale.total,
+            priceType: sale.price_type,
+          };
+        })
+      );
+
+      setSales(frontendSales);
+
+      setError(null);
+    } catch (error: any) {
+      console.error("Error auto-syncing:", error);
+      setError("Gagal auto-sync: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -281,6 +402,20 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white flex">
+      {/* Offline Indicator */}
+      <OfflineIndicator
+        isOnline={offlineSync.isOnline}
+        isSyncing={offlineSync.isSyncing}
+        queuedCount={offlineSync.queuedCount}
+        onRetrySync={() => offlineSync.syncQueue(
+          handleSale,
+          handleAddProduct,
+          handleUpdateProduct,
+          handleDeleteProduct
+        )}
+        failedCount={offlineSync.getFailedTransactions().length}
+      />
+
       {/* Sidebar */}
       <Sidebar
         activeMenu={activeMenu}
