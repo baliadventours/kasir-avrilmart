@@ -141,7 +141,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
             onClick={() => setPriceType("retail")}
             className={`flex-1 px-6 py-3 rounded-lg border-2 font-medium transition-all ${
               priceType === "retail"
-                ? "border-gray-900 bg-gray-900 text-white"
+                ? "border-[#E05D43] bg-[#E05D43] text-white"
                 : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
             }`}
           >
@@ -151,7 +151,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
             onClick={() => setPriceType("wholesale")}
             className={`flex-1 px-6 py-3 rounded-lg border-2 font-medium transition-all ${
               priceType === "wholesale"
-                ? "border-gray-900 bg-gray-900 text-white"
+                ? "border-[#E05D43] bg-[#E05D43] text-white"
                 : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
             }`}
           >

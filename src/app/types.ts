@@ -3,8 +3,10 @@ export interface Product {
   name: string;
   price_retail?: number;  // For Supabase (snake_case)
   price_wholesale?: number;  // For Supabase (snake_case)
+  price_modal?: number;  // For Supabase (snake_case) - Cost price
   priceRetail?: number;  // For frontend (camelCase) - legacy
   priceWholesale?: number;  // For frontend (camelCase) - legacy
+  priceModal?: number;  // For frontend (camelCase) - Cost price
   stock: number;
   sku: string;
   category: string;

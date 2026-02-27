@@ -25,6 +25,7 @@ export function InventoryManager({
     name: "",
     priceRetail: "",
     priceWholesale: "",
+    priceModal: "",
     stock: "",
     sku: "",
     category: "",
@@ -36,6 +37,7 @@ export function InventoryManager({
       name: "",
       priceRetail: "",
       priceWholesale: "",
+      priceModal: "",
       stock: "",
       sku: "",
       category: "",
@@ -52,6 +54,7 @@ export function InventoryManager({
       name: formData.name,
       priceRetail: parseFloat(formData.priceRetail),
       priceWholesale: parseFloat(formData.priceWholesale),
+      priceModal: parseFloat(formData.priceModal) || 0,
       stock: parseInt(formData.stock),
       sku: formData.sku,
       category: formData.category,
@@ -70,12 +73,13 @@ export function InventoryManager({
   const handleEdit = (product: Product) => {
     setFormData({
       name: product.name,
-      priceRetail: product.priceRetail.toString(),
-      priceWholesale: product.priceWholesale.toString(),
+      priceRetail: (product.priceRetail || product.price_retail || 0).toString(),
+      priceWholesale: (product.priceWholesale || product.price_wholesale || 0).toString(),
+      priceModal: (product.priceModal || product.price_modal || 0).toString(),
       stock: product.stock.toString(),
       sku: product.sku,
       category: product.category,
-      image: product.image,
+      image: product.image || "",
     });
     setEditingId(product.id);
     setShowForm(true);
@@ -280,6 +284,19 @@ export function InventoryManager({
                     placeholder="Rp"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-1">Harga Modal (Cost)</label>
+                <input
+                  type="number"
+                  step="1000"
+                  value={formData.priceModal}
+                  onChange={(e) => setFormData({ ...formData, priceModal: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Rp (optional)"
+                />
+                <p className="text-xs text-gray-500 mt-1">Harga modal/pokok produk (opsional)</p>
               </div>
 
               <div>

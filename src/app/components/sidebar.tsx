@@ -1,5 +1,4 @@
 import { Store, Package, BarChart3, Users, LogOut, Menu, X, FileText } from "lucide-react";
-import { useState } from "react";
 
 interface SidebarProps {
   activeMenu: string;
@@ -7,11 +6,11 @@ interface SidebarProps {
   userRole: "admin" | "cashier";
   userName: string;
   onLogout: () => void;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-export function Sidebar({ activeMenu, onMenuChange, userRole, userName, onLogout }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
-
+export function Sidebar({ activeMenu, onMenuChange, userRole, userName, onLogout, collapsed, onToggleCollapse }: SidebarProps) {
   const menuItems = [
     { id: "pos", label: "Kasir", icon: Store, allowCashier: true },
     { id: "inventory", label: "Inventori", icon: Package, allowCashier: false },
@@ -26,18 +25,10 @@ export function Sidebar({ activeMenu, onMenuChange, userRole, userName, onLogout
 
   return (
     <>
-      {/* Mobile overlay */}
-      {!collapsed && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-30 z-40 lg:hidden"
-          onClick={() => setCollapsed(true)}
-        />
-      )}
-
       {/* Sidebar */}
       <aside
         className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-50 transition-all duration-300 ${
-          collapsed ? "-translate-x-full lg:translate-x-0 lg:w-20" : "w-64"
+          collapsed ? "w-16" : "w-64"
         }`}
       >
         {/* Header */}
@@ -49,8 +40,8 @@ export function Sidebar({ activeMenu, onMenuChange, userRole, userName, onLogout
             </div>
           )}
           <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors lg:block hidden"
+            onClick={onToggleCollapse}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             {collapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
           </button>
@@ -59,7 +50,7 @@ export function Sidebar({ activeMenu, onMenuChange, userRole, userName, onLogout
         {/* User Info */}
         <div className="p-4 border-b border-gray-200">
           <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
-            <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center font-medium text-white">
+            <div className="w-10 h-10 rounded-full bg-[#E05D43] flex items-center justify-center font-medium text-white flex-shrink-0">
               {userName.charAt(0).toUpperCase()}
             </div>
             {!collapsed && (
@@ -85,7 +76,7 @@ export function Sidebar({ activeMenu, onMenuChange, userRole, userName, onLogout
                     onClick={() => onMenuChange(item.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                       isActive
-                        ? "bg-gray-900 text-white"
+                        ? "bg-[#E05D43] text-white"
                         : "text-gray-700 hover:bg-gray-100"
                     } ${collapsed ? "justify-center" : ""}`}
                   >
@@ -111,14 +102,6 @@ export function Sidebar({ activeMenu, onMenuChange, userRole, userName, onLogout
           </button>
         </div>
       </aside>
-
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setCollapsed(false)}
-        className="fixed top-4 left-4 lg:hidden z-30 bg-white border border-gray-200 p-3 rounded-lg shadow-lg"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
     </>
   );
 }

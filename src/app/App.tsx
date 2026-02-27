@@ -24,6 +24,7 @@ export default function App() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
@@ -286,10 +287,12 @@ export default function App() {
         userRole={user.role}
         userName={user.name}
         onLogout={handleLogout}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64 bg-gray-50">
+      <div className="flex-1 transition-all duration-300" style={{ marginLeft: sidebarCollapsed ? '64px' : '256px' }}>
         {/* Error Banner */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-6 py-3 flex justify-between items-center">
@@ -308,7 +311,7 @@ export default function App() {
         )}
 
         {/* Main Content Area */}
-        <main>
+        <main className="pt-6 bg-gray-50 min-h-screen">
           {activeMenu === "pos" && <POSInterface products={products} onSale={handleSale} />}
           {activeMenu === "inventory" && canAccessInventory && (
             <InventoryManager
