@@ -144,7 +144,8 @@ Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100`;
     for (let i = 0; i < validation.data.length; i++) {
       const row = validation.data[i];
       try {
-        await productsAPI.create({
+        // Only send fields that exist in database schema
+        const productData = {
           name: row.name.trim(),
           sku: row.sku.trim(),
           barcode: row.barcode?.trim() || null,
@@ -153,7 +154,9 @@ Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100`;
           wholesale_price: parseFloat(row.wholesale_price.toString()),
           modal_price: row.modal_price ? parseFloat(row.modal_price.toString()) : null,
           stock: parseInt(row.stock.toString()),
-        });
+        };
+        
+        await productsAPI.create(productData);
         successCount++;
       } catch (error: any) {
         failedCount++;

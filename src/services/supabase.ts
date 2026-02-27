@@ -17,11 +17,12 @@ export interface Product {
   id: string;
   name: string;
   sku: string;
+  barcode?: string | null;
   category: string;
-  price_retail: number;
-  price_wholesale: number;
+  retail_price: number;
+  wholesale_price: number;
+  modal_price?: number | null;
   stock: number;
-  image?: string;
   created_at?: string;
   updated_at?: string;
 }
