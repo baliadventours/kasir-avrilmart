@@ -12,8 +12,10 @@ export function dbToFrontendProduct(dbProduct: any): Product {
     // Support both naming conventions
     priceRetail: dbProduct.price_retail || dbProduct.priceRetail || 0,
     priceWholesale: dbProduct.price_wholesale || dbProduct.priceWholesale || 0,
+    priceModal: dbProduct.price_modal || dbProduct.priceModal || null,
     price_retail: dbProduct.price_retail || dbProduct.priceRetail || 0,
     price_wholesale: dbProduct.price_wholesale || dbProduct.priceWholesale || 0,
+    price_modal: dbProduct.price_modal || dbProduct.priceModal || null,
     created_at: dbProduct.created_at,
     updated_at: dbProduct.updated_at,
   };
@@ -41,6 +43,12 @@ export function frontendToDbProduct(product: Partial<Product>): any {
   }
   if (product.price_wholesale !== undefined) {
     dbProduct.price_wholesale = product.price_wholesale;
+  }
+  if (product.priceModal !== undefined) {
+    dbProduct.price_modal = product.priceModal;
+  }
+  if (product.price_modal !== undefined) {
+    dbProduct.price_modal = product.price_modal;
   }
 
   return dbProduct;

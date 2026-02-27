@@ -143,15 +143,17 @@ Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100`;
     for (let i = 0; i < validation.data.length; i++) {
       const row = validation.data[i];
       try {
-        // Only send fields that exist in database schema
-        const productData = {
+        // Convert frontend field names to database field names
+        // Database uses: price_retail, price_wholesale, price_modal
+        // CSV uses: retail_price, wholesale_price, modal_price
+        const productData: any = {
           name: row.name.trim(),
           sku: row.sku.trim(),
           barcode: row.barcode?.trim() || null,
           category: row.category.trim(),
-          retail_price: parseFloat(row.retail_price.toString()),
-          wholesale_price: parseFloat(row.wholesale_price.toString()),
-          modal_price: row.modal_price ? parseFloat(row.modal_price.toString()) : null,
+          price_retail: parseFloat(row.retail_price.toString()),
+          price_wholesale: parseFloat(row.wholesale_price.toString()),
+          price_modal: row.modal_price ? parseFloat(row.modal_price.toString()) : null,
           stock: parseInt(row.stock.toString()),
         };
         
@@ -304,7 +306,7 @@ Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100`;
                         {parseFloat(row.wholesale_price.toString()).toLocaleString("id-ID")}
                       </td>
                       <td className="px-3 py-2 text-right">
-                        {row.modal_price ? parseFloat(row.modal_price.toString()).toLocaleString("id-ID") : "-"}
+                        {row.modal_price ? parseFloat(row.modal_price.toString()).toLocaleString("id-ID") : '-'}
                       </td>
                       <td className="px-3 py-2 text-right">{row.stock}</td>
                     </tr>
