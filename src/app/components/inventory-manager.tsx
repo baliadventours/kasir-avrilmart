@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, Package, AlertTriangle, Upload, Download, Search, Scan } from "lucide-react";
+import { Plus, Edit2, Trash2, Package, AlertTriangle, Upload, Download, Search, Scan, Database, Trash } from "lucide-react";
 import { Product } from "../types";
 import { CSVImport } from "./csv-import";
 import { toast } from "sonner";
@@ -25,6 +25,8 @@ export function InventoryManager({
   const [isAddingNewCategory, setIsAddingNewCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+  const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     priceRetail: "",
@@ -178,6 +180,98 @@ export function InventoryManager({
     }
   };
 
+  const handleBackupDatabase = () => {
+    try {
+      // Create comprehensive backup with metadata
+      const backup = {
+        metadata: {
+          backup_date: new Date().toISOString(),
+          app_name: "Avril Mart POS",
+          version: "1.0",
+          total_products: products.length,
+          categories: existingCategories,
+        },
+        products: products.map((product) => ({
+          id: product.id,
+          name: product.name,
+          sku: product.sku,
+          barcode: product.barcode || "",
+          category: product.category,
+          priceRetail: product.priceRetail,
+          priceWholesale: product.priceWholesale,
+          priceModal: product.priceModal || 0,
+          stock: product.stock,
+          image: product.image,
+        })),
+      };
+
+      const jsonString = JSON.stringify(backup, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+      
+      link.setAttribute("href", url);
+      link.setAttribute("download", `avril-mart-backup-${timestamp}.json`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`✅ Backup database berhasil! (${products.length} produk)`, {
+        duration: 4000,
+      });
+    } catch (error: any) {
+      toast.error(`❌ Gagal backup database: ${error.message}`, {
+        duration: 4000,
+      });
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (deleteAllConfirmText !== "HAPUS SEMUA") {
+      toast.error("❌ Ketik 'HAPUS SEMUA' untuk konfirmasi", {
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      let successCount = 0;
+      let failedCount = 0;
+
+      // Delete all products one by one
+      for (const product of products) {
+        try {
+          await onDeleteProduct(product.id);
+          successCount++;
+        } catch (error) {
+          failedCount++;
+          console.error(`Failed to delete product ${product.id}:`, error);
+        }
+      }
+
+      setShowDeleteAllModal(false);
+      setDeleteAllConfirmText("");
+
+      if (failedCount === 0) {
+        toast.success(`✅ Berhasil menghapus ${successCount} produk!`, {
+          duration: 4000,
+        });
+      } else {
+        toast.warning(`⚠️ ${successCount} produk dihapus, ${failedCount} gagal`, {
+          duration: 5000,
+        });
+      }
+
+      onRefresh();
+    } catch (error: any) {
+      toast.error(`❌ Gagal menghapus produk: ${error.message}`, {
+        duration: 4000,
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -194,6 +288,13 @@ export function InventoryManager({
             >
               <Download className="w-5 h-5" />
               Export Produk
+            </button>
+            <button
+              onClick={handleBackupDatabase}
+              className="flex items-center gap-2 px-4 py-2 bg-[#E05D43] text-white rounded-lg hover:bg-[#C54D33] font-medium"
+            >
+              <Database className="w-5 h-5" />
+              Backup Database
             </button>
             <button
               onClick={() => setShowCSVImport(true)}
@@ -335,7 +436,89 @@ export function InventoryManager({
             ))}
           </tbody>
         </table>
+        
+        {/* Delete All Products - Danger Zone */}
+        {products.length > 0 && (
+          <div className="border-t border-gray-200 bg-red-50 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <div>
+                  <h3 className="font-semibold text-red-900">Danger Zone</h3>
+                  <p className="text-sm text-red-700">
+                    Hapus semua produk dari database ({products.length} produk)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDeleteAllModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+              >
+                <Trash className="w-5 h-5" />
+                Hapus Semua Produk
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Delete All Confirmation Modal */}
+      {showDeleteAllModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-red-100 p-3 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-red-900">Konfirmasi Hapus Semua</h2>
+                <p className="text-sm text-red-700">Tindakan ini tidak dapat dibatalkan!</p>
+              </div>
+            </div>
+
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-red-800 mb-2">
+                ⚠️ Anda akan menghapus <strong>{products.length} produk</strong> secara permanen dari database.
+              </p>
+              <p className="text-sm text-red-700">
+                Semua data produk, SKU, barcode, harga, dan stok akan hilang!
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-semibold mb-2 text-gray-900">
+                Ketik <span className="text-red-600 font-mono">HAPUS SEMUA</span> untuk konfirmasi:
+              </label>
+              <input
+                type="text"
+                value={deleteAllConfirmText}
+                onChange={(e) => setDeleteAllConfirmText(e.target.value)}
+                className="w-full px-3 py-2 border-2 border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 font-mono"
+                placeholder="HAPUS SEMUA"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteAllModal(false);
+                  setDeleteAllConfirmText("");
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDeleteAll}
+                disabled={deleteAllConfirmText !== "HAPUS SEMUA"}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Hapus Semua Produk
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit Product Modal */}
       {showForm && (
