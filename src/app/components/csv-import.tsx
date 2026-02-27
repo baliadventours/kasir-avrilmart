@@ -38,10 +38,10 @@ export function CSVImport({ onClose, onSuccess }: CSVImportProps) {
   } | null>(null);
 
   const downloadTemplate = () => {
-    const template = `name,sku,barcode,category,retail_price,wholesale_price,modal_price,stock,image_url
-Wireless Headphones,WH-001,,Electronics,150000,120000,100000,50,
-Smart Watch,SW-002,,Electronics,500000,450000,400000,30,
-Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100,`;
+    const template = `name,sku,barcode,category,retail_price,wholesale_price,modal_price,stock
+Wireless Headphones,WH-001,,Electronics,150000,120000,100000,50
+Smart Watch,SW-002,,Electronics,500000,450000,400000,30
+Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100`;
 
     const blob = new Blob([template], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -153,7 +153,6 @@ Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100,`;
           wholesale_price: parseFloat(row.wholesale_price.toString()),
           modal_price: row.modal_price ? parseFloat(row.modal_price.toString()) : null,
           stock: parseInt(row.stock.toString()),
-          image_url: row.image_url?.trim() || null,
         });
         successCount++;
       } catch (error: any) {
@@ -189,7 +188,7 @@ Coffee Mug,CM-003,,Kitchenware,50000,40000,30000,100,`;
               </h3>
               <p className="text-sm text-blue-800 mb-3">
                 File CSV harus memiliki kolom: name, sku, barcode (optional), category, retail_price,
-                wholesale_price, modal_price (optional), stock, image_url (optional)
+                wholesale_price, modal_price (optional), stock
               </p>
               <button
                 onClick={downloadTemplate}

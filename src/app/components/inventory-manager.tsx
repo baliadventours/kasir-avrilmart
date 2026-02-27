@@ -111,10 +111,10 @@ export function InventoryManager({
   const lowStockProducts = products.filter((p) => p.stock < 10);
 
   const exportProductsToCSV = () => {
-    const csvHeader = "name,sku,barcode,category,retail_price,wholesale_price,modal_price,stock,image_url\n";
+    const csvHeader = "name,sku,barcode,category,retail_price,wholesale_price,modal_price,stock\n";
     const csvContent = products
       .map((product) => {
-        return `"${product.name}",${product.sku},${product.barcode || ""},${product.category},${product.priceRetail},${product.priceWholesale},${product.priceModal || 0},${product.stock},`;
+        return `"${product.name}",${product.sku},${product.barcode || ""},${product.category},${product.priceRetail},${product.priceWholesale},${product.priceModal || 0},${product.stock}`;
       })
       .join("\n");
 
