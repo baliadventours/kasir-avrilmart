@@ -81,11 +81,14 @@ Dokumentasi lengkap tersedia:
 
 - **[📘 Installation Guide](./INSTALLATION.md)** - Step-by-step installation (START HERE!)
 - **[🚀 Quick Start](./QUICKSTART.md)** - Quick reference untuk setup cepat
+- **[🆕 Panduan Instalasi Toko Baru](./PANDUAN_INSTALASI_TOKO_BARU.md)** - Complete guide untuk setup toko baru (30 menit!)
 - **[🌐 Deployment Guide](./DEPLOYMENT.md)** - Complete setup untuk Vercel + Supabase
 - **[🔒 Security Guide](./SECURITY.md)** - Security architecture & best practices
+- **[🛡️ Security Audit Report](./SECURITY_AUDIT_REPORT.md)** - Production readiness audit & recommendations
 - **[📋 Admin Guide](./ADMIN_GUIDE.md)** - Quick reference untuk administrator
 - **[❓ FAQ](./FAQ.md)** - Frequently Asked Questions
 - **[🗄️ Database Schema](./supabase-schema.sql)** - Full PostgreSQL schema
+- **[🔐 Security Fix Script](./fix-security-for-production.sql)** - Critical security fixes before go-live
 
 ## 🗄️ Tech Stack
 
