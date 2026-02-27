@@ -21,6 +21,8 @@ export function InventoryManager({
   const [showForm, setShowForm] = useState(false);
   const [showCSVImport, setShowCSVImport] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isAddingNewCategory, setIsAddingNewCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     priceRetail: "",
@@ -32,6 +34,9 @@ export function InventoryManager({
     category: "",
     image: "",
   });
+
+  // Get unique categories from existing products
+  const existingCategories = Array.from(new Set(products.map(p => p.category))).sort();
 
   const resetForm = () => {
     setFormData({
@@ -47,10 +52,25 @@ export function InventoryManager({
     });
     setEditingId(null);
     setShowForm(false);
+    setIsAddingNewCategory(false);
+    setNewCategoryName("");
+  };
+
+  const handleCategoryChange = (value: string) => {
+    if (value === "__add_new__") {
+      setIsAddingNewCategory(true);
+      setFormData({ ...formData, category: "" });
+    } else {
+      setIsAddingNewCategory(false);
+      setFormData({ ...formData, category: value });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Use newCategoryName if adding new category
+    const finalCategory = isAddingNewCategory ? newCategoryName : formData.category;
     
     const productData = {
       name: formData.name,
@@ -60,7 +80,7 @@ export function InventoryManager({
       stock: parseInt(formData.stock),
       sku: formData.sku,
       barcode: formData.barcode || "",
-      category: formData.category,
+      category: finalCategory,
       image: formData.image || `https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop`,
     };
 
@@ -248,13 +268,41 @@ export function InventoryManager({
                 </div>
                 <div>
                   <label className="block text-sm font-semibold mb-1">Category</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  {!isAddingNewCategory ? (
+                    <select
+                      required
+                      value={formData.category}
+                      onChange={(e) => handleCategoryChange(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Pilih Kategori</option>
+                      {existingCategories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                      <option value="__add_new__">+ Tambah Kategori Baru</option>
+                    </select>
+                  ) : (
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        required
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Masukkan nama kategori baru"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAddingNewCategory(false);
+                          setNewCategoryName("");
+                        }}
+                        className="text-xs text-gray-600 hover:text-gray-900 underline"
+                      >
+                        ← Kembali ke pilihan kategori
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
