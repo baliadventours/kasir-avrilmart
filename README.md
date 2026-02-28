@@ -89,6 +89,7 @@ Dokumentasi lengkap tersedia:
 - **[❓ FAQ](./FAQ.md)** - Frequently Asked Questions
 - **[🗄️ Database Schema](./supabase-schema.sql)** - Full PostgreSQL schema
 - **[🔐 Security Fix Script](./fix-security-for-production.sql)** - Critical security fixes before go-live
+- **[🔧 Cache Fix Guide](./CACHE_FIX_GUIDE.md)** - Fix blank page / cache problems
 
 ## 🗄️ Tech Stack
 

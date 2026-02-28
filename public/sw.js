@@ -1,11 +1,9 @@
 // Service Worker for Avril Mart PWA
-const CACHE_NAME = 'avril-mart-v1';
-const RUNTIME_CACHE = 'avril-mart-runtime';
+const CACHE_NAME = 'avril-mart-v2'; // 🔄 INCREMENT THIS WHEN YOU DEPLOY NEW VERSION!
+const RUNTIME_CACHE = 'avril-mart-runtime-v2';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
@@ -91,7 +89,35 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first strategy for static assets
+  // 🔥 NETWORK-FIRST for HTML/JavaScript (prevent blank page from old cache)
+  const url = new URL(event.request.url);
+  if (
+    event.request.destination === 'document' ||
+    url.pathname.endsWith('.html') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname === '/'
+  ) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Clone and cache the fresh response
+          const responseClone = response.clone();
+          caches.open(RUNTIME_CACHE).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+          return response;
+        })
+        .catch(() => {
+          // Fallback to cache only if network fails (offline)
+          return caches.match(event.request).then((cachedResponse) => {
+            return cachedResponse || new Response('Offline', { status: 503 });
+          });
+        })
+    );
+    return;
+  }
+
+  // Cache-first strategy for static assets (images, fonts, css)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
