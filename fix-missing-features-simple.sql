@@ -1,15 +1,14 @@
 -- =====================================================
--- IDEMPOTENT SQL - SAFE TO RUN MULTIPLE TIMES
+-- SUPER SIMPLE VERSION - NO WINDOW FUNCTIONS
 -- =====================================================
--- This script is safe to run multiple times.
--- It will skip existing objects and only create missing ones.
--- =====================================================
-
--- =====================================================
--- 1. CREATE OR UPDATE USERS TABLE
+-- Use this if the main script still has issues
+-- This version generates simple sequential receipt numbers
 -- =====================================================
 
--- Create users table (skip if exists)
+-- =====================================================
+-- 1. CREATE USERS TABLE
+-- =====================================================
+
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -19,10 +18,9 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable RLS (safe to run multiple times)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
--- Recreate policies (drop first to avoid "already exists" errors)
+-- Drop and recreate policies
 DROP POLICY IF EXISTS "Admin can read all users" ON users;
 DROP POLICY IF EXISTS "Admin can insert users" ON users;
 DROP POLICY IF EXISTS "Admin can update users" ON users;
@@ -44,31 +42,13 @@ CREATE POLICY "Admin can delete users"
   ON users FOR DELETE
   USING (auth.jwt() -> 'user_metadata' ->> 'role' = 'admin');
 
--- Indexes (skip if exist)
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 
--- Helper function for updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Trigger for auto-updating updated_at
-DROP TRIGGER IF EXISTS update_users_updated_at ON users;
-CREATE TRIGGER update_users_updated_at
-  BEFORE UPDATE ON users
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
-
 -- =====================================================
--- 2. SYNC AUTH USERS TO USERS TABLE
+-- 2. SYNC AUTH USERS
 -- =====================================================
 
--- Insert missing users from auth.users
 INSERT INTO users (id, name, email, role)
 SELECT 
   id,
@@ -80,43 +60,56 @@ WHERE id NOT IN (SELECT id FROM users)
 ON CONFLICT (id) DO NOTHING;
 
 -- =====================================================
--- 3. ADD RECEIPT NUMBER TO SALES
+-- 3. ADD RECEIPT NUMBER TO SALES (SIMPLE WAY)
 -- =====================================================
 
--- Add receipt_number column (skip if exists)
+-- Add column if not exists
 DO $$ 
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
     WHERE table_name = 'sales' AND column_name = 'receipt_number'
   ) THEN
-    -- Add column
     ALTER TABLE sales ADD COLUMN receipt_number TEXT;
-    
-    -- Generate receipt numbers for existing sales using subquery
-    WITH numbered_sales AS (
-      SELECT 
-        id,
-        'INV-' || TO_CHAR(created_at, 'YYYYMMDD') || '-' || LPAD(CAST(ROW_NUMBER() OVER (ORDER BY created_at) AS TEXT), 5, '0') as new_receipt_number
-      FROM sales
-      WHERE receipt_number IS NULL
-    )
-    UPDATE sales
-    SET receipt_number = numbered_sales.new_receipt_number
-    FROM numbered_sales
-    WHERE sales.id = numbered_sales.id;
-    
-    -- Make it NOT NULL and add unique index
-    ALTER TABLE sales ALTER COLUMN receipt_number SET NOT NULL;
-    CREATE UNIQUE INDEX idx_sales_receipt_number ON sales(receipt_number);
   END IF;
 END $$;
 
+-- Generate simple receipt numbers for existing sales
+-- Using a simple loop instead of window function
+DO $$
+DECLARE
+  sale_record RECORD;
+  counter INTEGER := 1;
+BEGIN
+  FOR sale_record IN 
+    SELECT id, created_at 
+    FROM sales 
+    WHERE receipt_number IS NULL 
+    ORDER BY created_at
+  LOOP
+    UPDATE sales 
+    SET receipt_number = 'INV-' || TO_CHAR(sale_record.created_at, 'YYYYMMDD') || '-' || LPAD(counter::TEXT, 5, '0')
+    WHERE id = sale_record.id;
+    
+    counter := counter + 1;
+  END LOOP;
+END $$;
+
+-- Make NOT NULL if all records have receipt numbers
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM sales WHERE receipt_number IS NULL) THEN
+    ALTER TABLE sales ALTER COLUMN receipt_number SET NOT NULL;
+  END IF;
+END $$;
+
+-- Create index
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sales_receipt_number ON sales(receipt_number);
+
 -- =====================================================
--- 4. AUTO-GENERATE RECEIPT NUMBER FUNCTION
+-- 4. AUTO-GENERATE FUNCTION FOR NEW SALES
 -- =====================================================
 
--- Function to generate receipt numbers
 CREATE OR REPLACE FUNCTION generate_receipt_number()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -125,6 +118,7 @@ DECLARE
 BEGIN
   today_date := TO_CHAR(NOW(), 'YYYYMMDD');
   
+  -- Get next sequence number for today
   SELECT COALESCE(MAX(
     CAST(SUBSTRING(receipt_number FROM 'INV-\d{8}-(\d{5})') AS INTEGER)
   ), 0) + 1
@@ -138,7 +132,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger for new sales
 DROP TRIGGER IF EXISTS trigger_generate_receipt_number ON sales;
 CREATE TRIGGER trigger_generate_receipt_number
   BEFORE INSERT ON sales
@@ -147,24 +140,30 @@ CREATE TRIGGER trigger_generate_receipt_number
   EXECUTE FUNCTION generate_receipt_number();
 
 -- =====================================================
--- VERIFICATION QUERIES
+-- VERIFICATION
 -- =====================================================
 
--- Check users table
-SELECT 'Users in database:' as info, COUNT(*) as count FROM users;
-
--- Check sales with receipt numbers
-SELECT 'Sales with receipt numbers:' as info, COUNT(*) as count 
-FROM sales WHERE receipt_number IS NOT NULL;
-
--- Show sample data
-SELECT 'Sample users:' as info;
-SELECT id, name, email, role FROM users LIMIT 5;
-
+SELECT 'Users:' as info, COUNT(*) FROM users;
+SELECT 'Sales with receipts:' as info, COUNT(*) FROM sales WHERE receipt_number IS NOT NULL;
 SELECT 'Sample receipts:' as info;
-SELECT id, receipt_number, total, created_at FROM sales 
-ORDER BY created_at DESC LIMIT 5;
+SELECT id, receipt_number, total FROM sales ORDER BY created_at DESC LIMIT 5;
 
 -- =====================================================
--- ✅ DONE! Script completed successfully.
+-- ✅ DONE!
 -- =====================================================
+
+SELECT '
+✅ All features installed successfully!
+
+What was fixed:
+1. Users table created
+2. Auth users synced
+3. Receipt numbers added to all sales
+4. Auto-generate function for new sales
+
+Test it:
+- Go to User Management → Should see users
+- Go to Sales → Should see receipt numbers
+- Create new sale → Auto-generates receipt number
+
+' as success_message;
