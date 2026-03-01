@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan, Menu } from "lucide-react";
 import { Product, CartItem } from "../types";
 import { ThermalReceipt } from "./thermal-receipt";
+import { toast } from "sonner";
 
 interface POSInterfaceProps {
   products: Product[];
@@ -76,12 +77,12 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
         // Clear search
         setSearchTerm('');
         // Show success feedback (optional)
-        console.log(`Product added: ${product.name}`);
+        toast.success(`Produk ditambahkan: ${product.name}`);
       } else if (product && product.stock === 0) {
-        alert(`Stok habis untuk produk: ${product.name}`);
+        toast.error(`Stok habis untuk produk: ${product.name}`);
         setSearchTerm('');
       } else {
-        alert(`Produk tidak ditemukan: ${searchTerm}`);
+        toast.error(`Produk tidak ditemukan: ${searchTerm}`);
         setSearchTerm('');
       }
     }
