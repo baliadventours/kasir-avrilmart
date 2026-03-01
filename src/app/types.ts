@@ -29,4 +29,22 @@ export interface Sale {
   total: number;
   priceType: "retail" | "wholesale";
   payment_amount?: number;
+  receipt_number?: string;
+  payment_method?: "cash" | "credit_card" | "debit_card" | "qris" | "transfer";
+}
+
+export interface AppSettings {
+  id?: string;
+  store_name: string;
+  store_address: string;
+  store_phone: string;
+  logo_url?: string;
+  tax_enabled: boolean;
+  tax_percentage: number;
+  receipt_header: string;
+  receipt_footer: string;
+  show_payment_amount: boolean;
+  default_payment_method: "cash" | "credit_card" | "debit_card" | "qris" | "transfer";
+  created_at?: string;
+  updated_at?: string;
 }

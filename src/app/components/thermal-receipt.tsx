@@ -1,4 +1,5 @@
 import { X, Printer } from "lucide-react";
+import { AppSettings } from "../types";
 
 interface ThermalReceiptProps {
   sale: {
@@ -7,6 +8,8 @@ interface ThermalReceiptProps {
     payment_type: "retail" | "wholesale";
     created_at: string;
     payment_amount?: number;
+    receipt_number?: string;
+    payment_method?: "cash" | "credit_card" | "debit_card" | "qris" | "transfer";
     items: Array<{
       product_name: string;
       quantity: number;
@@ -14,21 +17,43 @@ interface ThermalReceiptProps {
       total: number;
     }>;
   };
-  storeName?: string;
-  storeAddress?: string;
-  storePhone?: string;
+  settings?: AppSettings | null;
   onClose: () => void;
 }
 
+const DEFAULT_SETTINGS: AppSettings = {
+  store_name: "AVRIL MART",
+  store_address: "Kintamani - Bali",
+  store_phone: "0812-3456-7890",
+  logo_url: "",
+  tax_enabled: false,
+  tax_percentage: 10,
+  receipt_header: "Terima kasih telah berbelanja!",
+  receipt_footer: "Barang yang sudah dibeli tidak dapat dikembalikan",
+  show_payment_amount: true,
+  default_payment_method: "cash",
+};
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  cash: "Tunai",
+  credit_card: "Kartu Kredit",
+  debit_card: "Kartu Debit",
+  qris: "QRIS",
+  transfer: "Transfer Bank",
+};
+
 export function ThermalReceipt({
   sale,
-  storeName = "AVRIL MART",
-  storeAddress = "Kintamani - Bali",
-  storePhone = "0812-3456-7890",
+  settings,
   onClose,
 }: ThermalReceiptProps) {
+  const activeSettings = settings || DEFAULT_SETTINGS;
+  
   const subtotal = sale.items.reduce((sum, item) => sum + item.total, 0);
-  const total = sale.total;
+  const tax = activeSettings.tax_enabled ? subtotal * (activeSettings.tax_percentage / 100) : 0;
+  const total = subtotal + tax;
+  
+  const paymentMethod = sale.payment_method || activeSettings.default_payment_method;
 
   const handlePrint = () => {
     window.print();
@@ -53,9 +78,9 @@ export function ThermalReceipt({
           <div className="border rounded-lg p-4 mb-4 bg-gray-50 max-h-96 overflow-y-auto">
             {/* Header */}
             <div className="text-center space-y-1 mb-4 pb-3 border-b border-dashed border-gray-400">
-              <div className="font-bold text-base">{storeName}</div>
-              <div className="text-xs">{storeAddress}</div>
-              <div className="text-xs">Telp: {storePhone}</div>
+              <div className="font-bold text-base">{activeSettings.store_name}</div>
+              <div className="text-xs">{activeSettings.store_address}</div>
+              <div className="text-xs">Telp: {activeSettings.store_phone}</div>
             </div>
 
             {/* Transaction Info */}
@@ -110,6 +135,12 @@ export function ThermalReceipt({
                 <span>Subtotal</span>
                 <span className="font-medium">Rp {subtotal.toLocaleString("id-ID")}</span>
               </div>
+              {activeSettings.tax_enabled && (
+                <div className="flex justify-between text-xs text-gray-600">
+                  <span>Pajak ({activeSettings.tax_percentage}%)</span>
+                  <span className="font-medium">Rp {tax.toLocaleString("id-ID")}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-gray-300">
                 <span>TOTAL</span>
                 <span>Rp {total.toLocaleString("id-ID")}</span>
@@ -198,9 +229,9 @@ export function ThermalReceipt({
         >
           {/* Store Header */}
           <div style={{ textAlign: "center", marginBottom: "10px" }}>
-            <div style={{ fontWeight: "bold", fontSize: "16px" }}>{storeName}</div>
-            <div style={{ fontSize: "11px", marginTop: "3px" }}>{storeAddress}</div>
-            <div style={{ fontSize: "11px" }}>Telp: {storePhone}</div>
+            <div style={{ fontWeight: "bold", fontSize: "16px" }}>{activeSettings.store_name}</div>
+            <div style={{ fontSize: "11px", marginTop: "3px" }}>{activeSettings.store_address}</div>
+            <div style={{ fontSize: "11px" }}>Telp: {activeSettings.store_phone}</div>
           </div>
 
           {/* Separator */}
@@ -291,6 +322,18 @@ export function ThermalReceipt({
               <span>Subtotal</span>
               <span>Rp {subtotal.toLocaleString("id-ID")}</span>
             </div>
+            {activeSettings.tax_enabled && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "4px",
+                }}
+              >
+                <span>Pajak ({activeSettings.tax_percentage}%)</span>
+                <span>Rp {tax.toLocaleString("id-ID")}</span>
+              </div>
+            )}
             <div
               style={{
                 display: "flex",

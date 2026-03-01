@@ -303,6 +303,66 @@ export const salesAPI = {
 };
 
 // ===================================
+// SETTINGS API
+// ===================================
+
+export const settingsAPI = {
+  // Get app settings (only one record should exist)
+  async get(): Promise<any | null> {
+    const { data, error } = await supabase
+      .from("app_settings")
+      .select("*")
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") return null; // Not found
+      console.error("Error fetching settings:", error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Create or update settings (upsert)
+  async upsert(settings: any): Promise<any> {
+    const { data: existing } = await supabase
+      .from("app_settings")
+      .select("id")
+      .limit(1)
+      .single();
+
+    if (existing) {
+      // Update existing
+      const { data, error } = await supabase
+        .from("app_settings")
+        .update(settings)
+        .eq("id", existing.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error updating settings:", error);
+        throw error;
+      }
+      return data;
+    } else {
+      // Create new
+      const { data, error } = await supabase
+        .from("app_settings")
+        .insert([settings])
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating settings:", error);
+        throw error;
+      }
+      return data;
+    }
+  },
+};
+
+// ===================================
 // AUTH API
 // ===================================
 

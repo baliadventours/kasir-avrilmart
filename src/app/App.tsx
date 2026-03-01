@@ -5,12 +5,13 @@ import { SalesHistory } from "./components/sales-history";
 import { Login } from "./components/login";
 import { UserManagement } from "./components/user-management";
 import { CategoryManager } from "./components/category-manager";
+import { Settings } from "./components/settings";
 import { Sidebar } from "./components/sidebar";
 import { Reports } from "./components/reports";
 import { OfflineIndicator } from "./components/offline-indicator";
 import { PWAPrompt } from "./components/pwa-prompt";
-import { Product, CartItem, Sale } from "./types";
-import { productsAPI, salesAPI, authAPI } from "../services/supabase";
+import { Product, CartItem, Sale, AppSettings } from "./types";
+import { productsAPI, salesAPI, authAPI, settingsAPI } from "../services/supabase";
 import { dbToFrontendProduct, frontendToDbProduct } from "../utils/helpers";
 import { useOfflineSync } from "./hooks/useOfflineSync";
 import { useLocalStorage } from "./hooks/useLocalStorage";
@@ -31,7 +32,7 @@ interface UserData {
 }
 
 export default function App() {
-  const [activeMenu, setActiveMenu] = useState<"pos" | "inventory" | "sales" | "reports" | "users" | "categories">("pos");
+  const [activeMenu, setActiveMenu] = useState<"pos" | "inventory" | "sales" | "reports" | "users" | "categories" | "settings">("pos");
   const [user, setUser] = useState<UserData | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export default function App() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
+  const [settings, setSettings] = useState<AppSettings | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,6 +60,7 @@ export default function App() {
     if (user) {
       loadProducts();
       loadSales();
+      loadSettings();
     }
   }, [user]);
 
@@ -195,6 +198,31 @@ export default function App() {
     } catch (error: any) {
       console.error("Error loading sales:", error);
       // Don't show error for sales loading - not critical
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      const dbSettings = await settingsAPI.get();
+      setSettings(dbSettings);
+    } catch (error: any) {
+      console.error("Error loading settings:", error);
+      // Don't show error for settings loading - not critical
+    }
+  };
+
+  const handleUpdateSettings = async (updates: Partial<AppSettings>) => {
+    try {
+      setLoading(true);
+      const updated = await settingsAPI.upsert(updates);
+      setSettings(updated);
+      setError(null);
+    } catch (error: any) {
+      console.error("Error updating settings:", error);
+      setError("Gagal update pengaturan: " + error.message);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -479,6 +507,7 @@ export default function App() {
             <UserManagement accessToken={accessToken || ""} />
           )}
           {activeMenu === "categories" && <CategoryManager />}
+          {activeMenu === "settings" && <Settings settings={settings} onUpdateSettings={handleUpdateSettings} />}
         </main>
       </div>
     </div>

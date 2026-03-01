@@ -1,4 +1,4 @@
-import { Store, Package, BarChart3, Users, LogOut, Menu, X, FileText, Tag } from "lucide-react";
+import { Store, Package, BarChart3, Users, LogOut, Menu, X, FileText, Tag, Settings } from "lucide-react";
 
 interface SidebarProps {
   activeMenu: string;
@@ -18,6 +18,7 @@ export function Sidebar({ activeMenu, onMenuChange, userRole, userName, onLogout
     { id: "sales", label: "Riwayat Penjualan", icon: BarChart3, allowCashier: true },
     { id: "reports", label: "Laporan", icon: FileText, allowCashier: false },
     { id: "users", label: "Pengguna", icon: Users, allowCashier: false },
+    { id: "settings", label: "Pengaturan", icon: Settings, allowCashier: false },
   ];
 
   const filteredMenuItems = menuItems.filter(
