@@ -61,6 +61,32 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
     }
   };
 
+  // 🔥 NEW: Handle barcode scan (auto-add to cart on Enter)
+  const handleBarcodeSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchTerm.trim()) {
+      // Search by barcode or SKU
+      const product = products.find((p) => 
+        p.barcode?.toLowerCase() === searchTerm.toLowerCase() ||
+        p.sku.toLowerCase() === searchTerm.toLowerCase()
+      );
+      
+      if (product && product.stock > 0) {
+        // Auto-add to cart
+        addToCart(product);
+        // Clear search
+        setSearchTerm('');
+        // Show success feedback (optional)
+        console.log(`Product added: ${product.name}`);
+      } else if (product && product.stock === 0) {
+        alert(`Stok habis untuk produk: ${product.name}`);
+        setSearchTerm('');
+      } else {
+        alert(`Produk tidak ditemukan: ${searchTerm}`);
+        setSearchTerm('');
+      }
+    }
+  };
+
   const updateQuantity = (id: string, newQuantity: number) => {
     const product = products.find((p) => p.id === id);
     if (!product) return;
@@ -140,6 +166,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search Produk/Scan Barcode"
               className="w-full pl-10 pr-10 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E05D43] focus:border-transparent"
+              onKeyDown={handleBarcodeSearch}
             />
             <Scan className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           </div>

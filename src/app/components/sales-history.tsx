@@ -1,4 +1,4 @@
-import { Receipt, TrendingUp, DollarSign, ShoppingBag, Download, Printer } from "lucide-react";
+import { Receipt, TrendingUp, DollarSign, ShoppingBag, Download, Printer, Search, Filter } from "lucide-react";
 import { Sale } from "../types";
 import { useState } from "react";
 import { ThermalReceipt } from "./thermal-receipt";
@@ -8,21 +8,53 @@ interface SalesHistoryProps {
 }
 
 export function SalesHistory({ sales }: SalesHistoryProps) {
-  const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
-  const totalItems = sales.reduce(
+  const [selectedSale, setSelectedSale] = useState<any | null>(null);
+  
+  // 🔥 NEW: Search and filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterPeriod, setFilterPeriod] = useState<"all" | "today" | "week" | "month" | "year">("all");
+  
+  // 🔥 NEW: Filter sales by search and period
+  const filteredSales = sales.filter((sale) => {
+    // Search by receipt number (transaction ID)
+    const txnId = sale.id.slice(0, 8).toUpperCase();
+    const matchesSearch = searchTerm === "" || 
+      txnId.includes(searchTerm.toUpperCase()) ||
+      sale.id.includes(searchTerm.toLowerCase());
+    
+    // Filter by time period
+    const saleDate = new Date(sale.date);
+    const now = new Date();
+    let matchesPeriod = true;
+    
+    if (filterPeriod === "today") {
+      matchesPeriod = saleDate.toDateString() === now.toDateString();
+    } else if (filterPeriod === "week") {
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      matchesPeriod = saleDate >= weekAgo;
+    } else if (filterPeriod === "month") {
+      matchesPeriod = saleDate.getMonth() === now.getMonth() && 
+                      saleDate.getFullYear() === now.getFullYear();
+    } else if (filterPeriod === "year") {
+      matchesPeriod = saleDate.getFullYear() === now.getFullYear();
+    }
+    
+    return matchesSearch && matchesPeriod;
+  });
+
+  const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.total, 0);
+  const totalItems = filteredSales.reduce(
     (sum, sale) => sum + sale.items.reduce((s, item) => s + item.quantity, 0),
     0
   );
 
   const today = new Date().toDateString();
-  const todaySales = sales.filter((sale) => new Date(sale.date).toDateString() === today);
+  const todaySales = filteredSales.filter((sale) => new Date(sale.date).toDateString() === today);
   const todayRevenue = todaySales.reduce((sum, sale) => sum + sale.total, 0);
-
-  const [selectedSale, setSelectedSale] = useState<any | null>(null);
 
   const exportToCSV = () => {
     const csvHeader = "No Transaksi,Tanggal,Waktu,Tipe Harga,Item,Jumlah,Total\n";
-    const csvContent = sales
+    const csvContent = filteredSales
       .map((sale) => {
         const date = new Date(sale.date);
         const dateStr = date.toLocaleDateString("id-ID");
@@ -83,6 +115,82 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
         </button>
       </div>
 
+      {/* 🔥 NEW: Search & Filter Section */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+        {/* Search Box */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Cari No. Transaksi (contoh: INV-20260227-00001)"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E05D43] focus:border-transparent"
+          />
+        </div>
+
+        {/* Filter Buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Filter className="w-5 h-5 text-gray-500" />
+          <span className="text-sm text-gray-600 font-medium">Filter:</span>
+          <button
+            onClick={() => setFilterPeriod("all")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filterPeriod === "all"
+                ? "bg-[#E05D43] text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Semua
+          </button>
+          <button
+            onClick={() => setFilterPeriod("today")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filterPeriod === "today"
+                ? "bg-[#E05D43] text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Hari Ini
+          </button>
+          <button
+            onClick={() => setFilterPeriod("week")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filterPeriod === "week"
+                ? "bg-[#E05D43] text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Minggu Ini
+          </button>
+          <button
+            onClick={() => setFilterPeriod("month")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filterPeriod === "month"
+                ? "bg-[#E05D43] text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Bulan Ini
+          </button>
+          <button
+            onClick={() => setFilterPeriod("year")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filterPeriod === "year"
+                ? "bg-[#E05D43] text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Tahun Ini
+          </button>
+        </div>
+
+        {/* Results Counter */}
+        <div className="text-sm text-gray-600">
+          Menampilkan <span className="font-bold text-gray-900">{filteredSales.length}</span> dari {sales.length} transaksi
+        </div>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -106,7 +214,7 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
             <Receipt className="w-5 h-5 text-purple-600" />
             <span className="text-sm font-semibold text-purple-800">Total Sales</span>
           </div>
-          <p className="text-2xl font-bold text-purple-900">{sales.length}</p>
+          <p className="text-2xl font-bold text-purple-900">{filteredSales.length}</p>
         </div>
 
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
@@ -148,14 +256,14 @@ export function SalesHistory({ sales }: SalesHistoryProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {sales.length === 0 ? (
+              {filteredSales.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
                     Belum ada transaksi
                   </td>
                 </tr>
               ) : (
-                sales
+                filteredSales
                   .slice()
                   .reverse()
                   .map((sale) => {

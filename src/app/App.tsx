@@ -406,7 +406,7 @@ export default function App() {
 
   // Check permissions for tabs
   const canAccessInventory = user.role === "admin";
-  const canAccessSales = user.role === "admin";
+  const canAccessSales = true; // ✅ Allow both admin and cashier to see transaction reports
   const canAccessUsers = user.role === "admin";
 
   return (
