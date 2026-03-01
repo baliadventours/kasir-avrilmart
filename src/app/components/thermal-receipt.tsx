@@ -78,9 +78,23 @@ export function ThermalReceipt({
           <div className="border rounded-lg p-4 mb-4 bg-gray-50 max-h-96 overflow-y-auto">
             {/* Header */}
             <div className="text-center space-y-1 mb-4 pb-3 border-b border-dashed border-gray-400">
+              {/* Logo */}
+              {activeSettings.logo_url && (
+                <div className="flex justify-center mb-2">
+                  <img 
+                    src={activeSettings.logo_url} 
+                    alt="Logo" 
+                    className="h-16 w-auto object-contain"
+                  />
+                </div>
+              )}
               <div className="font-bold text-base">{activeSettings.store_name}</div>
               <div className="text-xs">{activeSettings.store_address}</div>
               <div className="text-xs">Telp: {activeSettings.store_phone}</div>
+              {/* Header Message */}
+              {activeSettings.receipt_header && (
+                <div className="text-xs text-gray-600 italic mt-2">{activeSettings.receipt_header}</div>
+              )}
             </div>
 
             {/* Transaction Info */}
@@ -106,11 +120,15 @@ export function ThermalReceipt({
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">No. Transaksi</span>
-                <span className="font-medium">{sale.id.slice(0, 8).toUpperCase()}</span>
+                <span className="font-medium">{sale.receipt_number || sale.id.slice(0, 8).toUpperCase()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Tipe</span>
                 <span className="font-medium">{sale.payment_type === "retail" ? "Eceran" : "Grosir"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Pembayaran</span>
+                <span className="font-medium">{PAYMENT_METHOD_LABELS[paymentMethod]}</span>
               </div>
             </div>
 
@@ -163,11 +181,11 @@ export function ThermalReceipt({
 
             {/* Footer */}
             <div className="text-center text-xs text-gray-600 mt-4 pt-3 border-t border-dashed border-gray-400">
-              <div className="font-semibold text-gray-900 mb-1">
-                Terima kasih sudah berbelanja di Avril Mart
-              </div>
-              <div>Barang yang sudah dibeli</div>
-              <div>tidak dapat dikembalikan</div>
+              {activeSettings.receipt_footer && (
+                <div className="italic mb-2">
+                  {activeSettings.receipt_footer}
+                </div>
+              )}
             </div>
           </div>
 
@@ -270,6 +288,10 @@ export function ThermalReceipt({
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span>Tipe</span>
               <span>{sale.payment_type === "retail" ? "Eceran" : "Grosir"}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>Pembayaran</span>
+              <span>{PAYMENT_METHOD_LABELS[paymentMethod]}</span>
             </div>
           </div>
 

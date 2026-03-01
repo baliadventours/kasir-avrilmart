@@ -1,19 +1,29 @@
 import { useState } from "react";
-import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan, Menu } from "lucide-react";
-import { Product, CartItem } from "../types";
+import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan, Menu, CreditCard } from "lucide-react";
+import { Product, CartItem, AppSettings } from "../types";
 import { ThermalReceipt } from "./thermal-receipt";
 import { toast } from "sonner";
 
 interface POSInterfaceProps {
   products: Product[];
-  onSale: (items: CartItem[], total: number, priceType: "retail" | "wholesale", paymentAmount?: number) => void;
+  settings?: AppSettings | null;
+  onSale: (
+    items: CartItem[], 
+    total: number, 
+    priceType: "retail" | "wholesale", 
+    paymentAmount?: number,
+    paymentMethod?: "cash" | "credit_card" | "debit_card" | "qris" | "transfer"
+  ) => void;
 }
 
-export function POSInterface({ products, onSale }: POSInterfaceProps) {
+export function POSInterface({ products, settings, onSale }: POSInterfaceProps) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCheckout, setShowCheckout] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "credit_card" | "debit_card" | "qris" | "transfer">(
+    settings?.default_payment_method || "cash"
+  );
   const [priceType, setPriceType] = useState<"retail" | "wholesale">("retail");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [lastSale, setLastSale] = useState<any>(null);
@@ -117,6 +127,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
         total: total,
         payment_type: priceType,
         payment_amount: payment,
+        payment_method: paymentMethod,
         created_at: new Date().toISOString(),
         items: cart.map(item => ({
           product_name: item.name,
@@ -126,7 +137,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
         }))
       };
 
-      onSale(cart, total, priceType, payment);
+      onSale(cart, total, priceType, payment, paymentMethod);
       setLastSale(saleData);
       setCart([]);
       setShowCheckout(false);
@@ -412,6 +423,63 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
               ))}
             </div>
 
+            {/* Payment Method Selector */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2 text-gray-700">Metode Pembayaran</label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPaymentMethod("cash")}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    paymentMethod === "cash"
+                      ? "bg-[#E05D43] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Tunai
+                </button>
+                <button
+                  onClick={() => setPaymentMethod("credit_card")}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    paymentMethod === "credit_card"
+                      ? "bg-[#E05D43] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Kartu Kredit
+                </button>
+                <button
+                  onClick={() => setPaymentMethod("debit_card")}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    paymentMethod === "debit_card"
+                      ? "bg-[#E05D43] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Kartu Debit
+                </button>
+                <button
+                  onClick={() => setPaymentMethod("qris")}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    paymentMethod === "qris"
+                      ? "bg-[#E05D43] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  QRIS
+                </button>
+                <button
+                  onClick={() => setPaymentMethod("transfer")}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    paymentMethod === "transfer"
+                      ? "bg-[#E05D43] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Transfer
+                </button>
+              </div>
+            </div>
+
             {/* Action Buttons */}
             <div className="flex gap-3">
               <button
@@ -436,6 +504,7 @@ export function POSInterface({ products, onSale }: POSInterfaceProps) {
       {showReceipt && lastSale && (
         <ThermalReceipt
           sale={lastSale}
+          settings={settings}
           onClose={() => setShowReceipt(false)}
         />
       )}

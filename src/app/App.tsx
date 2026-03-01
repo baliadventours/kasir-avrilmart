@@ -491,7 +491,7 @@ export default function App() {
 
         {/* Main Content Area */}
         <main className={activeMenu === "pos" ? "bg-white min-h-screen" : "pt-6 bg-gray-50 min-h-screen"}>
-          {activeMenu === "pos" && <POSInterface products={products} onSale={handleSale} />}
+          {activeMenu === "pos" && <POSInterface products={products} settings={settings} onSale={handleSale} />}
           {activeMenu === "inventory" && canAccessInventory && (
             <InventoryManager
               products={products}
