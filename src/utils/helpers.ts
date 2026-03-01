@@ -6,6 +6,7 @@ export function dbToFrontendProduct(dbProduct: any): Product {
     id: dbProduct.id,
     name: dbProduct.name,
     sku: dbProduct.sku,
+    barcode: dbProduct.barcode || "",
     category: dbProduct.category,
     stock: dbProduct.stock,
     image: dbProduct.image,
@@ -26,6 +27,7 @@ export function frontendToDbProduct(product: Partial<Product>): any {
   const dbProduct: any = {
     name: product.name,
     sku: product.sku,
+    barcode: product.barcode || "",
     category: product.category,
     stock: product.stock,
     image: product.image,
@@ -52,24 +54,4 @@ export function frontendToDbProduct(product: Partial<Product>): any {
   }
 
   return dbProduct;
-}
-
-// Format currency to Indonesian Rupiah
-export function formatRupiah(amount: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(amount);
-}
-
-// Format date to Indonesian locale
-export function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("id-ID", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }

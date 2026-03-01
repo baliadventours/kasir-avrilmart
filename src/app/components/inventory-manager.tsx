@@ -387,8 +387,12 @@ export function InventoryManager({
                 <td className="px-6 py-4">
                   <div className="flex flex-col">
                     <span className="font-medium text-gray-900">{product.name}</span>
+                    <span className="text-xs text-gray-500 font-mono">SKU: {product.sku}</span>
                     {product.barcode && (
-                      <span className="text-xs text-gray-400">Barcode: {product.barcode}</span>
+                      <span className="text-xs text-blue-600 font-mono flex items-center gap-1">
+                        <Scan className="w-3 h-3" />
+                        {product.barcode}
+                      </span>
                     )}
                   </div>
                 </td>
@@ -398,10 +402,10 @@ export function InventoryManager({
                   </span>
                 </td>
                 <td className="px-6 py-4 font-semibold text-blue-600">
-                  Rp {product.priceRetail.toLocaleString()}
+                  Rp {(product.priceRetail || product.price_retail || 0).toLocaleString()}
                 </td>
                 <td className="px-6 py-4 font-semibold text-green-600">
-                  Rp {product.priceWholesale.toLocaleString()}
+                  Rp {(product.priceWholesale || product.price_wholesale || 0).toLocaleString()}
                 </td>
                 <td className="px-6 py-4">
                   <span
