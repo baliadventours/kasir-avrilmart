@@ -56,18 +56,45 @@ export interface SaleItem {
 // ===================================
 
 export const productsAPI = {
-  // Get all products
+  // Get all products (supports unlimited records with pagination)
   async getAll(): Promise<Product[]> {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("name");
+    let allProducts: Product[] = [];
+    let from = 0;
+    const batchSize = 1000; // Supabase default limit
+    let hasMore = true;
 
-    if (error) {
-      console.error("Error fetching products:", error);
-      throw error;
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("name")
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        console.error("Error fetching products:", error);
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        allProducts = [...allProducts, ...data];
+        from += batchSize;
+        
+        // If we got less than batchSize, we've reached the end
+        if (data.length < batchSize) {
+          hasMore = false;
+        }
+        
+        // Optional: Log progress for large datasets
+        if (allProducts.length % 1000 === 0) {
+          console.log(`Loaded ${allProducts.length} products...`);
+        }
+      } else {
+        hasMore = false;
+      }
     }
-    return data || [];
+
+    console.log(`✅ Total products loaded: ${allProducts.length}`);
+    return allProducts;
   },
 
   // Get product by ID

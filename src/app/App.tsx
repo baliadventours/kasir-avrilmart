@@ -32,19 +32,21 @@ interface UserData {
 }
 
 export default function App() {
-  const [activeMenu, setActiveMenu] = useState<"pos" | "inventory" | "sales" | "reports" | "users" | "categories" | "settings">("pos");
   const [user, setUser] = useState<UserData | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
+  const [activeMenu, setActiveMenu] = useState<
+    "pos" | "inventory" | "sales" | "reports" | "users" | "categories" | "settings"
+  >("pos");
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   // Offline sync hooks
   const offlineSync = useOfflineSync();
@@ -109,7 +111,6 @@ export default function App() {
 
   const handleLogin = async (email: string, password: string) => {
     setLoginLoading(true);
-    setLoginError(null);
 
     try {
       const { session, user: authUser } = await authAPI.signIn(email, password);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan, Menu, CreditCard } from "lucide-react";
 import { Product, CartItem, AppSettings } from "../types";
 import { ThermalReceipt } from "./thermal-receipt";
