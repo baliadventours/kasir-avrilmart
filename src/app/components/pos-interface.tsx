@@ -3,6 +3,7 @@ import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan, Menu, CreditCard, G
 import { Product, CartItem, AppSettings } from "../types";
 import { ThermalReceipt } from "./thermal-receipt";
 import { toast } from "sonner";
+import placeholderImage from "figma:asset/ac744fba181a74ac70fd151fdd8a6c794e48dcb9.png";
 
 interface POSInterfaceProps {
   products: Product[];
@@ -280,7 +281,7 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                     {/* Product Image */}
                     <div className="w-full aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden">
                       <img
-                        src={product.image || `https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop`}
+                        src={product.image || placeholderImage}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
