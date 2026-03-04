@@ -3,7 +3,9 @@ import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan, Menu, CreditCard, G
 import { Product, CartItem, AppSettings } from "../types";
 import { ThermalReceipt } from "./thermal-receipt";
 import { toast } from "sonner";
-import placeholderImage from "figma:asset/ac744fba181a74ac70fd151fdd8a6c794e48dcb9.png";
+
+// 🔥 Placeholder image as base64 SVG
+const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f3f4f6'/%3E%3Cpath d='M150 180 L200 120 L250 180 L280 150 L350 250 L50 250 Z' fill='%23d1d5db'/%3E%3Ccircle cx='120' cy='100' r='25' fill='%23d1d5db'/%3E%3C/svg%3E";
 
 interface POSInterfaceProps {
   products: Product[];
