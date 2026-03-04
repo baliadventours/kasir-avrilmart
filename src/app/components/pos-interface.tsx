@@ -1,11 +1,15 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback, memo } from "react";
 import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan, Menu, CreditCard, Grid3x3, List } from "lucide-react";
 import { Product, CartItem, AppSettings } from "../types";
 import { ThermalReceipt } from "./thermal-receipt";
 import { toast } from "sonner";
+import { ProductCard, ProductGridCard } from "./product-card-lazy";
 
 // 🔥 Placeholder image as base64 SVG
 const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f3f4f6'/%3E%3Cpath d='M150 180 L200 120 L250 180 L280 150 L350 250 L50 250 Z' fill='%23d1d5db'/%3E%3Ccircle cx='120' cy='100' r='25' fill='%23d1d5db'/%3E%3C/svg%3E";
+
+// 🔥 PERFORMA OPTIMIZATION: Limit produk yang di-render (default 100, bisa lebih jika search)
+const MAX_PRODUCTS_TO_RENDER = 100;
 
 interface POSInterfaceProps {
   products: Product[];
@@ -33,6 +37,7 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
   const [showReceipt, setShowReceipt] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list"); // 🔥 NEW: View mode toggle
+  const [displayLimit, setDisplayLimit] = useState(MAX_PRODUCTS_TO_RENDER); // 🔥 NEW: Pagination limit
 
   const availableProducts = products.filter((p) => p.stock > 0);
   
@@ -46,6 +51,11 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
     const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // 🔥 NEW: Limit displayed products untuk performa
+  const displayedProducts = filteredProducts.slice(0, displayLimit);
+  const hasMore = filteredProducts.length > displayLimit;
+  const remainingProducts = filteredProducts.length - displayLimit;
 
   const subtotal = cart.reduce((sum, item) => sum + item.appliedPrice * item.quantity, 0);
   const discount = 0;
@@ -122,6 +132,11 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
   const clearCart = () => {
     setCart([]);
   };
+
+  // 🔥 NEW: Reset pagination saat search atau kategori berubah
+  useEffect(() => {
+    setDisplayLimit(MAX_PRODUCTS_TO_RENDER);
+  }, [searchTerm, selectedCategory]);
 
   const completeSale = () => {
     const payment = parseFloat(paymentAmount);
@@ -211,6 +226,11 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
             />
             <Scan className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           </div>
+
+          {/* 🔥 NEW: Product Counter */}
+          <div className="mt-2 text-xs text-gray-500 text-center">
+            Menampilkan {displayedProducts.length} dari {filteredProducts.length} produk
+          </div>
         </div>
 
         {/* Products List - Scrollable with Bottom Padding */}
@@ -218,7 +238,7 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
           {/* 🔥 LIST VIEW */}
           {viewMode === "list" && (
             <div className="space-y-1.5 pt-4 pb-6">
-              {filteredProducts.map((product) => {
+              {displayedProducts.map((product) => {
                 const retailPrice = product.priceRetail || product.price_retail || 0;
                 const wholesalePrice = product.priceWholesale || product.price_wholesale || 0;
                 const displayPrice = priceType === "retail" ? retailPrice : wholesalePrice;
@@ -263,13 +283,27 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                   </button>
                 );
               })}
+              {hasMore && (
+                <button
+                  onClick={() => setDisplayLimit(displayLimit + MAX_PRODUCTS_TO_RENDER)}
+                  className="w-full bg-gray-50 rounded-lg px-4 py-3 hover:bg-gray-100 hover:border-[#E05D43] transition-all text-left border border-gray-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0 pr-4">
+                      <h3 className="font-semibold text-base text-gray-900 mb-1 truncate">
+                        Tampilkan {remainingProducts} produk lagi
+                      </h3>
+                    </div>
+                  </div>
+                </button>
+              )}
             </div>
           )}
 
           {/* 🔥 GRID VIEW */}
           {viewMode === "grid" && (
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-4 pb-6">
-              {filteredProducts.map((product) => {
+              {displayedProducts.map((product) => {
                 const retailPrice = product.priceRetail || product.price_retail || 0;
                 const wholesalePrice = product.priceWholesale || product.price_wholesale || 0;
                 const displayPrice = priceType === "retail" ? retailPrice : wholesalePrice;
@@ -285,6 +319,7 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                       <img
                         src={product.image || placeholderImage}
                         alt={product.name}
+                        loading="lazy"
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -320,6 +355,28 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                   </button>
                 );
               })}
+              {hasMore && (
+                <button
+                  onClick={() => setDisplayLimit(displayLimit + MAX_PRODUCTS_TO_RENDER)}
+                  className="bg-white rounded-lg p-4 hover:shadow-lg hover:border-[#E05D43] transition-all text-left border border-gray-200 flex flex-col"
+                >
+                  <div className="w-full aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden">
+                    <img
+                      src={placeholderImage}
+                      alt="Load More"
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  
+                  {/* Product Info */}
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2 min-h-[2.5rem]">
+                      Tampilkan {remainingProducts} produk lagi
+                    </h3>
+                  </div>
+                </button>
+              )}
             </div>
           )}
         </div>
