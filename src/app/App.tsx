@@ -42,7 +42,6 @@ export default function App() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
