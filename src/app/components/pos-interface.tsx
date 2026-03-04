@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan, Menu, CreditCard } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, Search, X, Scan, Menu, CreditCard, Grid3x3, List } from "lucide-react";
 import { Product, CartItem, AppSettings } from "../types";
 import { ThermalReceipt } from "./thermal-receipt";
 import { toast } from "sonner";
@@ -29,6 +29,7 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
   const [lastSale, setLastSale] = useState<any>(null);
   const [showReceipt, setShowReceipt] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list"); // 🔥 NEW: View mode toggle
 
   const availableProducts = products.filter((p) => p.stock > 0);
   
@@ -167,6 +168,31 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
               <span className="text-sm text-gray-500">Kategori:</span>
               <span className="text-sm font-medium text-gray-900">{selectedCategory}</span>
             </div>
+            {/* 🔥 NEW: View Toggle Buttons */}
+            <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-2 rounded transition-all ${
+                  viewMode === "list"
+                    ? "bg-white text-[#E05D43] shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+                title="List View"
+              >
+                <List className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-2 rounded transition-all ${
+                  viewMode === "grid"
+                    ? "bg-white text-[#E05D43] shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+                title="Grid View"
+              >
+                <Grid3x3 className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Search */}
@@ -186,53 +212,113 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
 
         {/* Products List - Scrollable with Bottom Padding */}
         <div className="flex-1 overflow-y-auto px-6" style={{ maxHeight: 'calc(100vh - 140px)' }}>
-          <div className="space-y-1.5 pt-4 pb-6">
-            {filteredProducts.map((product) => {
-              const retailPrice = product.priceRetail || product.price_retail || 0;
-              const wholesalePrice = product.priceWholesale || product.price_wholesale || 0;
-              const displayPrice = priceType === "retail" ? retailPrice : wholesalePrice;
-              
-              return (
-                <button
-                  key={product.id}
-                  onClick={() => addToCart(product)}
-                  className="w-full bg-white rounded-lg px-4 py-3 hover:bg-gray-50 hover:border-[#E05D43] transition-all text-left border border-gray-200"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <h3 className="font-semibold text-base text-gray-900 mb-1 truncate">
-                        {product.name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <span>SKU: {product.sku}</span>
-                        {product.barcode && (
-                          <>
-                            <span>•</span>
-                            <span className="flex items-center gap-1">
-                              <Scan className="w-3 h-3" />
-                              {product.barcode}
-                            </span>
-                          </>
-                        )}
-                        <span>•</span>
-                        <span className={`font-medium ${product.stock < 10 ? 'text-red-600' : 'text-green-600'}`}>
-                          Stok: {product.stock}
-                        </span>
+          {/* 🔥 LIST VIEW */}
+          {viewMode === "list" && (
+            <div className="space-y-1.5 pt-4 pb-6">
+              {filteredProducts.map((product) => {
+                const retailPrice = product.priceRetail || product.price_retail || 0;
+                const wholesalePrice = product.priceWholesale || product.price_wholesale || 0;
+                const displayPrice = priceType === "retail" ? retailPrice : wholesalePrice;
+                
+                return (
+                  <button
+                    key={product.id}
+                    onClick={() => addToCart(product)}
+                    className="w-full bg-white rounded-lg px-4 py-3 hover:bg-gray-50 hover:border-[#E05D43] transition-all text-left border border-gray-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0 pr-4">
+                        <h3 className="font-semibold text-base text-gray-900 mb-1 truncate">
+                          {product.name}
+                        </h3>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <span>SKU: {product.sku}</span>
+                          {product.barcode && (
+                            <>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Scan className="w-3 h-3" />
+                                {product.barcode}
+                              </span>
+                            </>
+                          )}
+                          <span>•</span>
+                          <span className={`font-medium ${product.stock < 10 ? 'text-red-600' : 'text-green-600'}`}>
+                            Stok: {product.stock}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-xl font-bold text-[#E05D43]">
+                          Rp {displayPrice.toLocaleString("id-ID")}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-0.5">
+                          {product.category}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <div className="text-xl font-bold text-[#E05D43]">
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* 🔥 GRID VIEW */}
+          {viewMode === "grid" && (
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-4 pb-6">
+              {filteredProducts.map((product) => {
+                const retailPrice = product.priceRetail || product.price_retail || 0;
+                const wholesalePrice = product.priceWholesale || product.price_wholesale || 0;
+                const displayPrice = priceType === "retail" ? retailPrice : wholesalePrice;
+                
+                return (
+                  <button
+                    key={product.id}
+                    onClick={() => addToCart(product)}
+                    className="bg-white rounded-lg p-4 hover:shadow-lg hover:border-[#E05D43] transition-all text-left border border-gray-200 flex flex-col"
+                  >
+                    {/* Product Image */}
+                    <div className="w-full aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden">
+                      <img
+                        src={product.image || `https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop`}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    
+                    {/* Product Info */}
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2 min-h-[2.5rem]">
+                        {product.name}
+                      </h3>
+                      <p className="text-xs text-gray-500 mb-2 truncate">
+                        SKU: {product.sku}
+                      </p>
+                      {product.barcode && (
+                        <p className="text-xs text-gray-400 mb-2 flex items-center gap-1 truncate">
+                          <Scan className="w-3 h-3 flex-shrink-0" />
+                          {product.barcode}
+                        </p>
+                      )}
+                      <div className={`text-xs font-medium mb-3 ${product.stock < 10 ? 'text-red-600' : 'text-green-600'}`}>
+                        Stok: {product.stock}
+                      </div>
+                    </div>
+                    
+                    {/* Price & Category */}
+                    <div>
+                      <div className="text-lg font-bold text-[#E05D43] mb-1">
                         Rp {displayPrice.toLocaleString("id-ID")}
                       </div>
-                      <div className="text-xs text-gray-400 mt-0.5">
+                      <div className="text-xs text-gray-400 truncate">
                         {product.category}
                       </div>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
