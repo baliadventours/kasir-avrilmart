@@ -253,36 +253,20 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                   <button
                     key={product.id}
                     onClick={() => addToCart(product)}
-                    className="w-full bg-white rounded-lg px-4 py-3 hover:bg-gray-50 hover:border-[#E05D43] transition-all text-left border border-gray-200"
+                    className="w-full bg-white rounded-lg px-3 py-2 hover:bg-gray-50 hover:border-[#E05D43] transition-all text-left border border-gray-200"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0 pr-4">
-                        <h3 className="font-semibold text-base text-gray-900 mb-1 truncate">
+                      <div className="flex-1 min-w-0 pr-3">
+                        <h3 className="font-semibold text-sm text-gray-900 truncate">
                           {product.name}
                         </h3>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <span>SKU: {product.sku}</span>
-                          {product.barcode && (
-                            <>
-                              <span>•</span>
-                              <span className="flex items-center gap-1">
-                                <Scan className="w-3 h-3" />
-                                {product.barcode}
-                              </span>
-                            </>
-                          )}
-                          <span>•</span>
-                          <span className={`font-medium ${product.stock < 10 ? 'text-red-600' : 'text-green-600'}`}>
-                            Stok: {product.stock}
-                          </span>
+                        <div className="text-[10px] text-gray-400 mt-0.5 truncate">
+                          {product.category}
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div className="text-xl font-bold text-[#E05D43]">
+                        <div className="text-sm font-bold text-[#E05D43]">
                           Rp {displayPrice.toLocaleString("id-ID")}
-                        </div>
-                        <div className="text-xs text-gray-400 mt-0.5">
-                          {product.category}
                         </div>
                       </div>
                     </div>
@@ -292,15 +276,11 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
               {hasMore && (
                 <button
                   onClick={() => setDisplayLimit(displayLimit + MAX_PRODUCTS_TO_RENDER)}
-                  className="w-full bg-gray-50 rounded-lg px-4 py-3 hover:bg-gray-100 hover:border-[#E05D43] transition-all text-left border border-gray-200"
+                  className="w-full bg-gray-50 rounded-lg px-3 py-2.5 hover:bg-gray-100 hover:border-[#E05D43] transition-all text-center border border-gray-200"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <h3 className="font-semibold text-base text-gray-900 mb-1 truncate">
-                        Tampilkan {remainingProducts} produk lagi
-                      </h3>
-                    </div>
-                  </div>
+                  <h3 className="font-semibold text-sm text-gray-900">
+                    Tampilkan {remainingProducts} produk lagi
+                  </h3>
                 </button>
               )}
             </div>
@@ -318,10 +298,10 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                   <button
                     key={product.id}
                     onClick={() => addToCart(product)}
-                    className="bg-white rounded-lg p-4 hover:shadow-lg hover:border-[#E05D43] transition-all text-left border border-gray-200 flex flex-col"
+                    className="bg-white rounded-lg p-3 hover:shadow-md hover:border-[#E05D43] transition-all text-left border border-gray-200 flex flex-col"
                   >
                     {/* Product Image */}
-                    <div className="w-full aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden flex items-center justify-center p-2">
+                    <div className="w-full aspect-square bg-gray-50 rounded-lg mb-2 overflow-hidden flex items-center justify-center p-2">
                       <img
                         src={product.image || placeholderImage}
                         alt={product.name}
@@ -335,31 +315,17 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                     </div>
                     
                     {/* Product Info */}
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2 min-h-[2.5rem]">
+                    <div className="flex-1 flex flex-col justify-between">
+                      <h3 className="font-semibold text-sm text-gray-900 leading-snug line-clamp-2 mb-2">
                         {product.name}
                       </h3>
-                      <p className="text-xs text-gray-500 mb-2 truncate">
-                        SKU: {product.sku}
-                      </p>
-                      {product.barcode && (
-                        <p className="text-xs text-gray-400 mb-2 flex items-center gap-1 truncate">
-                          <Scan className="w-3 h-3 flex-shrink-0" />
-                          {product.barcode}
-                        </p>
-                      )}
-                      <div className={`text-xs font-medium mb-3 ${product.stock < 10 ? 'text-red-600' : 'text-green-600'}`}>
-                        Stok: {product.stock}
-                      </div>
-                    </div>
-                    
-                    {/* Price & Category */}
-                    <div>
-                      <div className="text-lg font-bold text-[#E05D43] mb-1">
-                        Rp {displayPrice.toLocaleString("id-ID")}
-                      </div>
-                      <div className="text-xs text-gray-400 truncate">
-                        {product.category}
+                      <div>
+                        <div className="text-sm font-bold text-[#E05D43]">
+                          Rp {displayPrice.toLocaleString("id-ID")}
+                        </div>
+                        <div className="text-[10px] text-gray-400 truncate mt-0.5">
+                          {product.category}
+                        </div>
                       </div>
                     </div>
                   </button>
@@ -368,9 +334,9 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
               {hasMore && (
                 <button
                   onClick={() => setDisplayLimit(displayLimit + MAX_PRODUCTS_TO_RENDER)}
-                  className="bg-white rounded-lg p-4 hover:shadow-lg hover:border-[#E05D43] transition-all text-left border border-gray-200 flex flex-col"
+                  className="bg-white rounded-lg p-3 hover:shadow-md hover:border-[#E05D43] transition-all text-center border border-gray-200 flex flex-col"
                 >
-                  <div className="w-full aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden p-2">
+                  <div className="w-full aspect-square bg-gray-50 rounded-lg mb-2 overflow-hidden p-2">
                     <img
                       src={placeholderImage}
                       alt="Load More"
@@ -380,8 +346,8 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                   </div>
                   
                   {/* Product Info */}
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2 min-h-[2.5rem]">
+                  <div className="flex-1 flex items-center justify-center">
+                    <h3 className="font-semibold text-sm text-gray-900">
                       Tampilkan {remainingProducts} produk lagi
                     </h3>
                   </div>
