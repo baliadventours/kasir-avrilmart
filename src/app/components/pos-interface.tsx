@@ -5,8 +5,8 @@ import { ThermalReceipt } from "./thermal-receipt";
 import { toast } from "sonner";
 import { ProductCard, ProductGridCard } from "./product-card-lazy";
 
-// 🔥 Placeholder image as base64 SVG
-const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23f3f4f6'/%3E%3Cpath d='M150 180 L200 120 L250 180 L280 150 L350 250 L50 250 Z' fill='%23d1d5db'/%3E%3Ccircle cx='120' cy='100' r='25' fill='%23d1d5db'/%3E%3C/svg%3E";
+// 🔥 Custom Placeholder Image
+const placeholderImage = "https://i.ibb.co.com/GvsmxH9Y/avrilmart-app-icon.png";
 
 // 🔥 PERFORMA OPTIMIZATION: Limit produk yang di-render (default 100, bisa lebih jika search)
 const MAX_PRODUCTS_TO_RENDER = 100;
@@ -36,7 +36,7 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
   const [lastSale, setLastSale] = useState<any>(null);
   const [showReceipt, setShowReceipt] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list"); // 🔥 NEW: View mode toggle
+  const [viewMode, setViewMode] = useState<"list" | "grid">("grid"); // 🔥 NEW: View mode toggle
   const [displayLimit, setDisplayLimit] = useState(MAX_PRODUCTS_TO_RENDER); // 🔥 NEW: Pagination limit
   const cartEndRef = useRef<HTMLDivElement>(null);
 
@@ -321,12 +321,16 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                     className="bg-white rounded-lg p-4 hover:shadow-lg hover:border-[#E05D43] transition-all text-left border border-gray-200 flex flex-col"
                   >
                     {/* Product Image */}
-                    <div className="w-full aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden">
+                    <div className="w-full aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden flex items-center justify-center p-2">
                       <img
                         src={product.image || placeholderImage}
                         alt={product.name}
                         loading="lazy"
-                        className="w-full h-full object-cover"
+                        className={`w-full h-full object-contain ${
+                          !product.image || product.image === placeholderImage 
+                            ? 'grayscale opacity-40' 
+                            : 'object-cover'
+                        }`}
                       />
                     </div>
                     
@@ -366,12 +370,12 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                   onClick={() => setDisplayLimit(displayLimit + MAX_PRODUCTS_TO_RENDER)}
                   className="bg-white rounded-lg p-4 hover:shadow-lg hover:border-[#E05D43] transition-all text-left border border-gray-200 flex flex-col"
                 >
-                  <div className="w-full aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden">
+                  <div className="w-full aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden p-2">
                     <img
                       src={placeholderImage}
                       alt="Load More"
                       loading="lazy"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain grayscale opacity-40"
                     />
                   </div>
                   
