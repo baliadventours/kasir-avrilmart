@@ -38,6 +38,12 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list"); // 🔥 NEW: View mode toggle
   const [displayLimit, setDisplayLimit] = useState(MAX_PRODUCTS_TO_RENDER); // 🔥 NEW: Pagination limit
+  const cartEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom of cart when items are added
+  useEffect(() => {
+    cartEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [cart]);
 
   const availableProducts = products.filter((p) => p.stock > 0);
   
@@ -426,46 +432,46 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
               <p className="text-gray-400 text-sm">Belum ada item</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-1.5">
               {cart.map((item) => (
-                <div key={item.id} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1 min-w-0 pr-2">
-                      <h4 className="font-semibold text-sm text-gray-900 mb-0.5 truncate">{item.name}</h4>
-                      <p className="text-xs text-gray-500">
-                        Rp {item.appliedPrice.toLocaleString("id-ID")} × {item.quantity}
-                      </p>
-                    </div>
+                <div key={item.id} className="bg-gray-50 rounded p-2 border border-gray-100 flex flex-col gap-1">
+                  <div className="flex justify-between items-start">
+                    <h4 className="font-semibold text-sm text-gray-900 leading-tight truncate pr-2 flex-1">{item.name}</h4>
                     <button
                       onClick={() => removeFromCart(item.id)}
-                      className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg flex-shrink-0"
+                      className="text-red-400 hover:text-red-600 ml-1"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 bg-white rounded-lg border border-gray-200 p-0.5">
+                  <div className="flex justify-between items-end mt-0.5">
+                    <div className="flex items-center bg-white rounded border border-gray-200 shadow-sm">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded"
+                        className="w-6 h-6 flex items-center justify-center hover:bg-gray-100"
                       >
-                        <Minus className="w-3 h-3" />
+                        <Minus className="w-3 h-3 text-gray-600" />
                       </button>
-                      <span className="w-8 text-center font-medium text-sm">{item.quantity}</span>
+                      <span className="w-8 text-center font-medium text-xs">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded"
+                        className="w-6 h-6 flex items-center justify-center hover:bg-gray-100"
                       >
-                        <Plus className="w-3 h-3" />
+                        <Plus className="w-3 h-3 text-gray-600" />
                       </button>
                     </div>
-                    <span className="font-bold text-sm text-gray-900">
-                      Rp {(item.quantity * item.appliedPrice).toLocaleString("id-ID")}
-                    </span>
+                    <div className="text-right">
+                      <div className="font-bold text-sm text-gray-900">
+                        Rp {(item.quantity * item.appliedPrice).toLocaleString("id-ID")}
+                      </div>
+                      <div className="text-[10px] text-gray-500">
+                        Rp {item.appliedPrice.toLocaleString("id-ID")}/pc
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
+              <div ref={cartEndRef} />
             </div>
           )}
         </div>
