@@ -303,14 +303,20 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                     {/* Product Image */}
                     <div className="w-full aspect-square bg-gray-50 rounded-lg mb-2 overflow-hidden flex items-center justify-center p-2">
                       <img
-                        src={product.image || placeholderImage}
+                        src={
+                          !product.image || product.image.includes("unsplash.com") 
+                            ? placeholderImage 
+                            : product.image
+                        }
                         alt={product.name}
                         loading="lazy"
                         className={`w-full h-full object-contain ${
-                          !product.image || product.image === placeholderImage ? '' : 'object-cover'
+                          !product.image || product.image === placeholderImage || product.image.includes("unsplash.com")
+                            ? '' 
+                            : 'object-cover'
                         }`}
                         style={
-                          !product.image || product.image === placeholderImage 
+                          !product.image || product.image === placeholderImage || product.image.includes("unsplash.com")
                             ? { filter: 'grayscale(100%)', opacity: 0.4 } 
                             : {}
                         }
