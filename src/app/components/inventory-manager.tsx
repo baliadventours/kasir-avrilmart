@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Edit2, Trash2, Package, AlertTriangle, Upload, Download, Search, Scan, Database, Trash } from "lucide-react";
+import { supabase } from "../../services/supabase";
 import { Product } from "../types";
 import { CSVImport } from "./csv-import";
 import { toast } from "sonner";
@@ -39,8 +40,27 @@ export function InventoryManager({
     category: "",
   });
 
-  // Get unique categories from existing products
-  const existingCategories = Array.from(new Set(products.map(p => p.category))).sort();
+  const [dbCategories, setDbCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase.from("categories").select("name");
+        if (!error && data) {
+          setDbCategories(data.map((c) => c.name));
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Get unique categories from existing products and database
+  const existingCategories = Array.from(new Set([
+    ...products.map(p => p.category).filter(Boolean),
+    ...dbCategories
+  ])).sort();
 
   const resetForm = () => {
     setFormData({
