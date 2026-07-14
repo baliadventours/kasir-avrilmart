@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { MobileNav } from "./components/mobile-nav";
 import { POSInterface } from "./components/pos-interface";
 import { InventoryManager } from "./components/inventory-manager";
 import { SalesHistory } from "./components/sales-history";
@@ -44,6 +45,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showMobileMenuDrawer, setShowMobileMenuDrawer] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [loginError, setLoginError] = useState<string | null>(null);
 
@@ -460,6 +462,7 @@ export default function App() {
       />
 
       {/* Sidebar */}
+      {/* Desktop Sidebar */}
       <Sidebar
         activeMenu={activeMenu}
         onMenuChange={(menu) => setActiveMenu(menu as any)}
@@ -469,9 +472,16 @@ export default function App() {
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
+      {/* Mobile Bottom Navigation */}
+      <MobileNav
+        activeMenu={activeMenu}
+        onMenuChange={(menu) => setActiveMenu(menu as any)}
+        onOpenDrawer={() => setShowMobileMenuDrawer(true)}
+      />
 
       {/* Main Content */}
-      <div className="flex-1 transition-all duration-300" style={{ marginLeft: sidebarCollapsed ? '64px' : '256px' }}>
+      {/* Main Content Area */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'md:w-16' : 'md:w-64'} md:ml-0`} style={{ marginLeft: sidebarCollapsed ? '64px' : '256px' }}>
         {/* Error Banner */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-6 py-3 flex justify-between items-center">

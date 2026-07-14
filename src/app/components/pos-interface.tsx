@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { ProductCard, ProductGridCard } from "./product-card-lazy";
 
 // 🔥 Custom Placeholder Image (Local)
-const placeholderImage = "/avrilmart-app-icon.png";
+const placeholderImage = "https://i.ibb.co.com/GvsmxH9Y/avrilmart-app-icon.png";
 
 // 🔥 PERFORMA OPTIMIZATION: Limit produk yang di-render (default 100, bisa lebih jika search)
 const MAX_PRODUCTS_TO_RENDER = 100;
@@ -379,6 +379,92 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
             </div>
           </div>
           
+          {/* Mobile Cart Button */}
+            <button
+              className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-[#E05D43] text-white py-2 px-4 rounded-full md:hidden"
+              onClick={() => setShowCartPanel(true)}
+            >
+              Lihat Keranjang ({cartCount}) - Rp {total.toLocaleString("id-ID")}
+            </button>
+
+            {/* Mobile Cart Panel */}
+            {showCartPanel && (
+              <div className="fixed inset-0 bg-white z-50 p-4 overflow-y-auto md:hidden">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold">Keranjang</h2>
+                  <button onClick={() => setShowCartPanel(false)} className="p-2">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                {cart.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                    <p className="text-gray-400 text-sm">Belum ada item</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {cart.map((item) => (
+                      <div key={item.id} className="bg-gray-50 rounded p-2 border border-gray-100 flex flex-col gap-1">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-semibold text-sm text-gray-900 leading-tight truncate pr-2 flex-1">
+                            {item.name}
+                          </h4>
+                          <button onClick={() => removeFromCart(item.id)} className="text-red-400 hover:text-red-600 ml-1">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <div className="flex justify-between items-end mt-0.5">
+                          <div className="flex items-center bg-white rounded border border-gray-200 shadow-sm">
+                            <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-6 h-6 flex items-center justify-center hover:bg-gray-100">
+                              <Minus className="w-3 h-3 text-gray-600" />
+                            </button>
+                            <span className="w-8 text-center font-medium text-xs">{item.quantity}</span>
+                            <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-6 h-6 flex items-center justify-center hover:bg-gray-100">
+                              <Plus className="w-3 h-3 text-gray-600" />
+                            </button>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-sm text-gray-900">
+                              Rp {(item.quantity * item.appliedPrice).toLocaleString("id-ID")}
+                            </div>
+                            <div className="text-[10px] text-gray-500">Rp {item.appliedPrice.toLocaleString("id-ID")}/pc</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={cartEndRef} />
+                  </div>
+                )}
+                {/* Order Summary */}
+                {cart.length > 0 && (
+                  <div className="flex-shrink-0 border-t border-gray-200 px-6 py-4 bg-gray-50 mt-4">
+                    <div className="space-y-2 text-sm mb-4">
+                      <div className="flex justify-between text-gray-600">
+                        <span>Subtotal</span>
+                        <span>Rp {subtotal.toLocaleString("id-ID")}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-600">
+                        <span>Diskon</span>
+                        <span>-Rp {discount.toLocaleString("id-ID")}</span>
+                      </div>
+                      <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-300">
+                        <span>Total</span>
+                        <span>Rp {total.toLocaleString("id-ID")}</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <button onClick={clearCart} className="flex-1 py-2.5 rounded-lg border-2 border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors">
+                        Hapus Semua
+                      </button>
+                      <button onClick={() => setShowCheckout(true)} className="flex-1 py-2.5 rounded-lg bg-[#E05D43] text-white text-sm font-medium hover:bg-[#C54D33] transition-all">
+                        Bayar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
           {/* Price Type Selector */}
           <div className="flex gap-2">
             <button
