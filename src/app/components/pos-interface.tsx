@@ -38,6 +38,7 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid"); // 🔥 NEW: View mode toggle
   const [displayLimit, setDisplayLimit] = useState(MAX_PRODUCTS_TO_RENDER); // 🔥 NEW: Pagination limit
+  const [showCartPanel, setShowCartPanel] = useState(false); // 🔥 Mobile cart panel toggle
   const cartEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom of cart when items are added
