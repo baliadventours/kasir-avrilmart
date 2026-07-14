@@ -5,8 +5,8 @@ import { ThermalReceipt } from "./thermal-receipt";
 import { toast } from "sonner";
 import { ProductCard, ProductGridCard } from "./product-card-lazy";
 
-// 🔥 Custom Placeholder Image
-const placeholderImage = "https://i.ibb.co.com/GvsmxH9Y/avrilmart-app-icon.png";
+// 🔥 Custom Placeholder Image (Local)
+const placeholderImage = "/avrilmart-app-icon.png";
 
 // 🔥 PERFORMA OPTIMIZATION: Limit produk yang di-render (default 100, bisa lebih jika search)
 const MAX_PRODUCTS_TO_RENDER = 100;
@@ -307,10 +307,13 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                         alt={product.name}
                         loading="lazy"
                         className={`w-full h-full object-contain ${
-                          !product.image || product.image === placeholderImage 
-                            ? 'grayscale opacity-40' 
-                            : 'object-cover'
+                          !product.image || product.image === placeholderImage ? '' : 'object-cover'
                         }`}
+                        style={
+                          !product.image || product.image === placeholderImage 
+                            ? { filter: 'grayscale(100%)', opacity: 0.4 } 
+                            : {}
+                        }
                       />
                     </div>
                     
@@ -341,7 +344,8 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
                       src={placeholderImage}
                       alt="Load More"
                       loading="lazy"
-                      className="w-full h-full object-contain grayscale opacity-40"
+                      className="w-full h-full object-contain"
+                      style={{ filter: 'grayscale(100%)', opacity: 0.4 }}
                     />
                   </div>
                   
