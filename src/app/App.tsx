@@ -439,6 +439,16 @@ export default function App() {
   const canAccessSales = true; // ✅ Allow both admin and cashier to see transaction reports
   const canAccessUsers = user.role === "admin";
 
+  const allMenuItems = [
+    { id: "pos", label: "Kasir", emoji: "🛒", allowCashier: true },
+    { id: "inventory", label: "Inventori", emoji: "📦", allowCashier: false },
+    { id: "categories", label: "Kategori", emoji: "🏷️", allowCashier: false },
+    { id: "sales", label: "Riwayat Penjualan", emoji: "📊", allowCashier: true },
+    { id: "reports", label: "Laporan", emoji: "📄", allowCashier: false },
+    { id: "users", label: "Pengguna", emoji: "👥", allowCashier: false },
+    { id: "settings", label: "Pengaturan", emoji: "⚙️", allowCashier: false },
+  ].filter((item) => user.role === "admin" || item.allowCashier);
+
   return (
     <div className="min-h-screen bg-white flex">
       {/* Toast Notifications */}
@@ -461,7 +471,6 @@ export default function App() {
         failedCount={offlineSync.getFailedTransactions().length}
       />
 
-      {/* Sidebar */}
       {/* Desktop Sidebar */}
       <Sidebar
         activeMenu={activeMenu}
@@ -472,6 +481,7 @@ export default function App() {
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
+
       {/* Mobile Bottom Navigation */}
       <MobileNav
         activeMenu={activeMenu}
@@ -479,16 +489,71 @@ export default function App() {
         onOpenDrawer={() => setShowMobileMenuDrawer(true)}
       />
 
-      {/* Main Content */}
+      {/* Mobile Drawer (slide from right) */}
+      {showMobileMenuDrawer && (
+        <div className="md:hidden fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowMobileMenuDrawer(false)}
+          />
+          {/* Drawer */}
+          <div className="absolute right-0 top-0 bottom-0 w-72 bg-white shadow-2xl flex flex-col" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+            {/* Header */}
+            <div className="px-5 py-5 bg-gradient-to-br from-[#E05D43] to-[#C54D33] text-white">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="w-11 h-11 rounded-full bg-white/25 flex items-center justify-center font-bold text-lg">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">{user.name}</p>
+                  <p className="text-xs text-white/75">{user.role === "admin" ? "Administrator" : "Kasir"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Menu items */}
+            <nav className="flex-1 overflow-y-auto py-3 px-3">
+              {allMenuItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => { setActiveMenu(item.id as any); setShowMobileMenuDrawer(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl mb-1 text-left transition-all ${
+                    activeMenu === item.id
+                      ? "bg-[#E05D43]/10 text-[#E05D43] font-semibold"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="text-lg">{item.emoji}</span>
+                  <span className="text-sm">{item.label}</span>
+                  {activeMenu === item.id && (
+                    <span className="ml-auto w-1.5 h-5 bg-[#E05D43] rounded-full" />
+                  )}
+                </button>
+              ))}
+            </nav>
+
+            {/* Logout */}
+            <div className="px-3 py-4 border-t border-gray-100">
+              <button
+                onClick={() => { handleLogout(); setShowMobileMenuDrawer(false); }}
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
+              >
+                <span className="text-lg">🚪</span>
+                <span className="text-sm font-medium">Keluar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'md:w-16' : 'md:w-64'} md:ml-0`} style={{ marginLeft: sidebarCollapsed ? '64px' : '256px' }}>
+      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? "md:ml-16" : "md:ml-64"} overflow-hidden`}>
         {/* Error Banner */}
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-6 py-3 flex justify-between items-center">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="text-red-900 font-bold hover:text-red-700">
-              ×
-            </button>
+            <button onClick={() => setError(null)} className="text-red-900 font-bold hover:text-red-700">×</button>
           </div>
         )}
 
@@ -499,8 +564,8 @@ export default function App() {
           </div>
         )}
 
-        {/* Main Content Area */}
-        <main className={activeMenu === "pos" ? "bg-white min-h-screen" : "pt-6 bg-gray-50 min-h-screen"}>
+        {/* Page Content */}
+        <main className={activeMenu === "pos" ? "h-[100dvh] overflow-hidden" : "pt-4 pb-20 md:pb-6 px-4 md:px-6 bg-gray-50 min-h-screen"}>
           {activeMenu === "pos" && <POSInterface products={products} settings={settings} onSale={handleSale} />}
           {activeMenu === "inventory" && canAccessInventory && (
             <InventoryManager
