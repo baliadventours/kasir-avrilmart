@@ -58,12 +58,12 @@ export default function App() {
     checkSession();
   }, []);
 
-  // Load products when user logs in
+  // Load products and settings when user logs in; sales are lazy-loaded
   useEffect(() => {
     if (user) {
-      loadProducts();
-      loadSales();
+      loadProductsCacheFirst();
       loadSettings();
+      // Sales are loaded lazily when the tab is opened
     }
   }, [user]);
 
@@ -147,12 +147,42 @@ export default function App() {
     }
   };
 
+  // ⚡ CACHE-FIRST: Show cached products instantly, then refresh in background
+  const loadProductsCacheFirst = async () => {
+    // 1. Show cached products immediately (zero wait)
+    const cached = localStorage.loadProducts();
+    if (cached && cached.length > 0) {
+      setProducts(cached);
+    } else {
+      setLoading(true);
+    }
+
+    // 2. Fetch fresh products in the background
+    try {
+      const dbProducts = await productsAPI.getForPOS();
+      const frontendProducts = dbProducts.map(dbToFrontendProduct);
+      setProducts(frontendProducts);
+      localStorage.saveProducts(frontendProducts);
+      setError(null);
+    } catch (error: any) {
+      console.error("Error loading products:", error);
+      if (!localStorage.loadProducts()) {
+        setError("Gagal memuat produk: " + error.message);
+      }
+      // If cached data exists, silently use it — user never sees an error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Full product reload (used by Inventory Manager)
   const loadProducts = async () => {
     try {
       setLoading(true);
       const dbProducts = await productsAPI.getAll();
       const frontendProducts = dbProducts.map(dbToFrontendProduct);
       setProducts(frontendProducts);
+      localStorage.saveProducts(frontendProducts);
       setError(null);
     } catch (error: any) {
       console.error("Error loading products:", error);
@@ -162,15 +192,19 @@ export default function App() {
     }
   };
 
+  // ⚡ LAZY: Only load sales when the Sales or Reports tab is opened
+  const [salesLoaded, setSalesLoaded] = useState(false);
+
   const loadSales = async () => {
+    if (salesLoaded) return; // Already loaded this session
     try {
       const dbSales = await salesAPI.getAll();
-      
+
       // Convert to frontend format
       const frontendSales: Sale[] = await Promise.all(
         dbSales.map(async (sale) => {
           const { items } = await salesAPI.getWithItems(sale.id);
-          
+
           const cartItems: CartItem[] = items.map((item) => ({
             id: item.product_id,
             name: item.product_name,
@@ -197,9 +231,10 @@ export default function App() {
       );
 
       setSales(frontendSales);
+      localStorage.saveSales(frontendSales);
+      setSalesLoaded(true);
     } catch (error: any) {
       console.error("Error loading sales:", error);
-      // Don't show error for sales loading - not critical
     }
   };
 
@@ -576,8 +611,9 @@ export default function App() {
               onRefresh={loadProducts}
             />
           )}
-          {activeMenu === "sales" && canAccessSales && <SalesHistory sales={sales} />}
-          {activeMenu === "reports" && canAccessSales && <Reports sales={sales} />}
+          {activeMenu === "sales" && canAccessSales && (() => { if (!salesLoaded) loadSales(); return <SalesHistory sales={sales} />; })()}
+          {activeMenu === "reports" && canAccessSales && (() => { if (!salesLoaded) loadSales(); return <Reports sales={sales} />; })()}
+
           {activeMenu === "users" && canAccessUsers && (
             <UserManagement accessToken={accessToken || ""} />
           )}

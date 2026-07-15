@@ -56,17 +56,17 @@ export interface SaleItem {
 // ===================================
 
 export const productsAPI = {
-  // Get all products (supports unlimited records with pagination)
+  // Get ALL products - only for Inventory Manager (select minimal columns)
   async getAll(): Promise<Product[]> {
     let allProducts: Product[] = [];
     let from = 0;
-    const batchSize = 1000; // Supabase default limit
+    const batchSize = 1000;
     let hasMore = true;
 
     while (hasMore) {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select("id,name,sku,barcode,category,retail_price,wholesale_price,modal_price,stock")
         .order("name")
         .range(from, from + batchSize - 1);
 
@@ -78,16 +78,7 @@ export const productsAPI = {
       if (data && data.length > 0) {
         allProducts = [...allProducts, ...data];
         from += batchSize;
-        
-        // If we got less than batchSize, we've reached the end
-        if (data.length < batchSize) {
-          hasMore = false;
-        }
-        
-        // Optional: Log progress for large datasets
-        if (allProducts.length % 1000 === 0) {
-          console.log(`Loaded ${allProducts.length} products...`);
-        }
+        if (data.length < batchSize) hasMore = false;
       } else {
         hasMore = false;
       }
@@ -96,6 +87,37 @@ export const productsAPI = {
     console.log(`✅ Total products loaded: ${allProducts.length}`);
     return allProducts;
   },
+
+  // ⚡ Lightweight fetch for POS screen — only in-stock products, limited columns
+  async getForPOS(): Promise<Product[]> {
+    const { data, error } = await supabase
+      .from("products")
+      .select("id,name,sku,barcode,category,retail_price,wholesale_price,stock")
+      .gt("stock", 0)
+      .order("name")
+      .limit(200);
+
+    if (error) {
+      console.error("Error fetching POS products:", error);
+      throw error;
+    }
+    return data || [];
+  },
+
+  // ⚡ Search by barcode/SKU — single product lookup for scanner
+  async searchBySKUOrBarcode(query: string): Promise<Product | null> {
+    const { data, error } = await supabase
+      .from("products")
+      .select("id,name,sku,barcode,category,retail_price,wholesale_price,stock")
+      .or(`sku.eq.${query},barcode.eq.${query}`)
+      .gt("stock", 0)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data || null;
+  },
+
 
   // Get product by ID
   async getById(id: string): Promise<Product | null> {
