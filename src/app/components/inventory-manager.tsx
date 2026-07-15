@@ -107,7 +107,8 @@ export function InventoryManager({
       priceModal: parseFloat(formData.priceModal) || 0,
       stock: parseInt(formData.stock),
       sku: autoSKU,
-      barcode: formData.barcode || "",
+      barcode: formData.barcode?.trim() || null,
+
       category: finalCategory,
       image: "",
     };
@@ -141,6 +142,7 @@ export function InventoryManager({
       stock: product.stock.toString(),
       barcode: product.barcode || "",
       category: product.category,
+
     });
     setEditingId(product.id);
     setShowForm(true);
@@ -266,7 +268,8 @@ export function InventoryManager({
           id: product.id,
           name: product.name,
           sku: product.sku,
-          barcode: product.barcode || "",
+          barcode: product.barcode?.trim() || null,
+
           category: product.category,
           priceRetail: product.priceRetail,
           priceWholesale: product.priceWholesale,

@@ -6,7 +6,7 @@ export function dbToFrontendProduct(dbProduct: any): Product {
     id: dbProduct.id,
     name: dbProduct.name,
     sku: dbProduct.sku,
-    barcode: dbProduct.barcode || "",
+    barcode: dbProduct.barcode || null,
     category: dbProduct.category,
     stock: dbProduct.stock,
     image: dbProduct.image,
@@ -27,7 +27,8 @@ export function frontendToDbProduct(product: Partial<Product>): any {
   const dbProduct: any = {
     name: product.name,
     sku: product.sku,
-    barcode: product.barcode || "",
+    // Send null (not empty string) for missing barcode — DB unique constraint allows multiple NULLs
+    barcode: product.barcode?.trim() || null,
     category: product.category,
     stock: product.stock,
     image: product.image,
