@@ -29,7 +29,8 @@ export function InventoryManager({
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
   const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 500;
+  const ITEMS_PER_PAGE = 100;
+
   const [formData, setFormData] = useState({
     name: "",
     priceRetail: "",

@@ -66,7 +66,7 @@ export const productsAPI = {
     while (hasMore) {
       const { data, error } = await supabase
         .from("products")
-        .select("id,name,sku,barcode,category,retail_price,wholesale_price,modal_price,stock")
+        .select("id,name,sku,barcode,category,price_retail,price_wholesale,price_modal,stock")
         .order("name")
         .range(from, from + batchSize - 1);
 
@@ -92,7 +92,7 @@ export const productsAPI = {
   async getForPOS(): Promise<Product[]> {
     const { data, error } = await supabase
       .from("products")
-      .select("id,name,sku,barcode,category,retail_price,wholesale_price,stock")
+      .select("id,name,sku,barcode,category,price_retail,price_wholesale,stock")
       .gt("stock", 0)
       .order("name")
       .limit(200);
@@ -108,7 +108,7 @@ export const productsAPI = {
   async searchBySKUOrBarcode(query: string): Promise<Product | null> {
     const { data, error } = await supabase
       .from("products")
-      .select("id,name,sku,barcode,category,retail_price,wholesale_price,stock")
+      .select("id,name,sku,barcode,category,price_retail,price_wholesale,stock")
       .or(`sku.eq.${query},barcode.eq.${query}`)
       .gt("stock", 0)
       .limit(1)

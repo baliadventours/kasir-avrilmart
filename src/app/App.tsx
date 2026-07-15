@@ -403,54 +403,21 @@ export default function App() {
     try {
       setLoading(true);
 
-      // Sync products
-      const dbProducts = await productsAPI.getAll();
+      // Use lightweight POS fetch for sync (not the heavy getAll)
+      const dbProducts = await productsAPI.getForPOS();
       const frontendProducts = dbProducts.map(dbToFrontendProduct);
       setProducts(frontendProducts);
-
-      // Sync sales
-      const dbSales = await salesAPI.getAll();
-      
-      // Convert to frontend format
-      const frontendSales: Sale[] = await Promise.all(
-        dbSales.map(async (sale) => {
-          const { items } = await salesAPI.getWithItems(sale.id);
-          
-          const cartItems: CartItem[] = items.map((item) => ({
-            id: item.product_id,
-            name: item.product_name,
-            sku: item.product_sku,
-            priceRetail: item.price,
-            priceWholesale: item.price,
-            price_retail: item.price,
-            price_wholesale: item.price,
-            stock: 0,
-            category: "",
-            quantity: item.quantity,
-            priceType: sale.price_type,
-            appliedPrice: item.price,
-          }));
-
-          return {
-            id: sale.id,
-            date: sale.created_at,
-            items: cartItems,
-            total: sale.total,
-            priceType: sale.price_type,
-          };
-        })
-      );
-
-      setSales(frontendSales);
+      localStorage.saveProducts(frontendProducts);
 
       setError(null);
     } catch (error: any) {
       console.error("Error auto-syncing:", error);
-      setError("Gagal auto-sync: " + error.message);
+      // Don't block the UI for sync errors — cached data is still usable
     } finally {
       setLoading(false);
     }
   };
+
 
   // Show loading while checking session
   if (isCheckingSession) {
