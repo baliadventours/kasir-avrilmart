@@ -148,11 +148,11 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
     }
   };
 
-  // ─── Shared sub-components ───────────────────────────────────────────────
+  // ─── RENDER ───────────────────────────────────────────────────────────────
 
-  /** Cart item row used in both desktop sidebar and mobile sheet */
-  const CartItemRow = ({ item }: { item: CartItem }) => (
-    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+  // Inline helpers (not components - avoids remount on every render)
+  const renderCartItem = (item: CartItem) => (
+    <div key={item.id} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
       <div className="flex justify-between items-start mb-2">
         <h4 className="font-semibold text-sm text-gray-900 leading-tight flex-1 pr-2 line-clamp-2">{item.name}</h4>
         <button onClick={() => removeFromCart(item.id)} className="text-red-400 hover:text-red-600 flex-shrink-0">
@@ -161,266 +161,181 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
       </div>
       <div className="flex justify-between items-center">
         <div className="flex items-center bg-white rounded-lg border border-gray-200 shadow-sm">
-          <button
-            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-            className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-l-lg"
-          >
+          <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-l-lg">
             <Minus className="w-3 h-3 text-gray-600" />
           </button>
           <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
-          <button
-            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-            className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-r-lg"
-          >
+          <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-7 h-7 flex items-center justify-center hover:bg-gray-100 rounded-r-lg">
             <Plus className="w-3 h-3 text-gray-600" />
           </button>
         </div>
         <div className="text-right">
-          <div className="font-bold text-sm text-gray-900">
-            Rp {(item.quantity * item.appliedPrice).toLocaleString("id-ID")}
-          </div>
+          <div className="font-bold text-sm text-gray-900">Rp {(item.quantity * item.appliedPrice).toLocaleString("id-ID")}</div>
           <div className="text-[10px] text-gray-400">Rp {item.appliedPrice.toLocaleString("id-ID")}/pc</div>
         </div>
       </div>
     </div>
   );
 
-  /** Order summary + action buttons (shared) */
-  const OrderSummary = ({ onPay }: { onPay: () => void }) => (
+  const renderOrderSummary = (onPay: () => void) => (
     <div className="border-t border-gray-200 px-4 py-4 bg-white">
       <div className="space-y-1.5 text-sm mb-4">
-        <div className="flex justify-between text-gray-600">
-          <span>Subtotal</span>
-          <span>Rp {subtotal.toLocaleString("id-ID")}</span>
-        </div>
-        <div className="flex justify-between text-gray-600">
-          <span>Diskon</span>
-          <span>-Rp {discount.toLocaleString("id-ID")}</span>
-        </div>
+        <div className="flex justify-between text-gray-600"><span>Subtotal</span><span>Rp {subtotal.toLocaleString("id-ID")}</span></div>
+        <div className="flex justify-between text-gray-600"><span>Diskon</span><span>-Rp {discount.toLocaleString("id-ID")}</span></div>
         <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200 mt-2">
           <span>Total</span>
           <span className="text-[#E05D43]">Rp {total.toLocaleString("id-ID")}</span>
         </div>
       </div>
       <div className="flex gap-2">
-        <button
-          onClick={clearCart}
-          className="flex-1 py-3 rounded-xl border-2 border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors"
-        >
-          Hapus
-        </button>
-        <button
-          onClick={onPay}
-          className="flex-2 px-6 py-3 rounded-xl bg-[#E05D43] text-white text-sm font-semibold hover:bg-[#C54D33] transition-all shadow-lg shadow-orange-200"
-        >
-          Bayar Sekarang
-        </button>
+        <button onClick={clearCart} className="flex-1 py-3 rounded-xl border-2 border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors">Hapus</button>
+        <button onClick={onPay} className="flex-2 px-6 py-3 rounded-xl bg-[#E05D43] text-white text-sm font-semibold hover:bg-[#C54D33] transition-all shadow-lg shadow-orange-200">Bayar Sekarang</button>
       </div>
     </div>
   );
-
-  // ─── Product grid / list header ─────────────────────────────────────────
-
-  const ProductHeader = () => (
-    <div className="flex-shrink-0 bg-white border-b border-gray-100 px-3 md:px-6 py-3">
-      {/* Top row: category + view toggle */}
-      <div className="flex items-center gap-2 mb-3">
-        <button
-          onClick={() => setShowCategoryMenu(true)}
-          className="flex items-center gap-1.5 px-3 py-2 bg-[#E05D43] text-white rounded-lg hover:bg-[#C54D33] transition-all font-medium text-sm flex-shrink-0"
-        >
-          <Menu className="w-4 h-4" />
-          <span className="hidden sm:inline">Kategori</span>
-        </button>
-        <div className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg flex-1 min-w-0">
-          <span className="text-xs text-gray-400 flex-shrink-0">Kategori:</span>
-          <span className="text-xs font-semibold text-gray-800 truncate">{selectedCategory}</span>
-        </div>
-        {/* Price type toggle (mobile compact) */}
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5 flex-shrink-0">
-          <button
-            onClick={() => setPriceType("retail")}
-            className={`px-2 py-1.5 rounded-md text-xs font-medium transition-all ${
-              priceType === "retail" ? "bg-white text-[#E05D43] shadow-sm" : "text-gray-500"
-            }`}
-          >
-            Eceran
-          </button>
-          <button
-            onClick={() => setPriceType("wholesale")}
-            className={`px-2 py-1.5 rounded-md text-xs font-medium transition-all ${
-              priceType === "wholesale" ? "bg-white text-[#E05D43] shadow-sm" : "text-gray-500"
-            }`}
-          >
-            Grosir
-          </button>
-        </div>
-        {/* View mode */}
-        <div className="flex gap-0.5 bg-gray-100 rounded-lg p-0.5 flex-shrink-0">
-          <button
-            onClick={() => setViewMode("list")}
-            className={`p-1.5 rounded transition-all ${viewMode === "list" ? "bg-white text-[#E05D43] shadow-sm" : "text-gray-400"}`}
-          >
-            <List className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`p-1.5 rounded transition-all ${viewMode === "grid" ? "bg-white text-[#E05D43] shadow-sm" : "text-gray-400"}`}
-          >
-            <Grid3x3 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Search bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Cari produk / scan barcode…"
-          className="w-full pl-9 pr-9 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E05D43] focus:border-transparent"
-          onKeyDown={handleBarcodeSearch}
-        />
-        <Scan className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-      </div>
-
-      <div className="mt-1.5 text-[10px] text-gray-400 text-center">
-        {displayedProducts.length} dari {filteredProducts.length} produk
-      </div>
-    </div>
-  );
-
-  // ─── Product list/grid ───────────────────────────────────────────────────
-
-  const ProductGrid = () => (
-    <div className="flex-1 overflow-y-auto px-3 md:px-6 py-3">
-      {viewMode === "list" ? (
-        <div className="space-y-1.5 pb-6">
-          {displayedProducts.map((product) => {
-            const retailPrice = product.priceRetail || product.price_retail || 0;
-            const wholesalePrice = product.priceWholesale || product.price_wholesale || 0;
-            const displayPrice = priceType === "retail" ? retailPrice : wholesalePrice;
-            return (
-              <button
-                key={product.id}
-                onClick={() => addToCart(product)}
-                className="w-full bg-white rounded-xl px-3 py-2.5 hover:bg-orange-50 hover:border-[#E05D43] transition-all text-left border border-gray-200 active:scale-[0.98]"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0 pr-3">
-                    <h3 className="font-semibold text-sm text-gray-900 truncate">{product.name}</h3>
-                    <p className="text-xs text-gray-400 mt-0.5">{product.sku} · Stok: {product.stock}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-bold text-[#E05D43]">Rp {displayPrice.toLocaleString("id-ID")}</div>
-                    <div className="text-[10px] text-gray-400">{product.category}</div>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-          {hasMore && (
-            <button
-              onClick={() => setDisplayLimit(displayLimit + MAX_PRODUCTS_TO_RENDER)}
-              className="w-full py-3 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:bg-gray-100 transition-colors"
-            >
-              Tampilkan {remainingProducts} produk lagi…
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 pb-6">
-          {displayedProducts.map((product) => {
-            const retailPrice = product.priceRetail || product.price_retail || 0;
-            const wholesalePrice = product.priceWholesale || product.price_wholesale || 0;
-            const displayPrice = priceType === "retail" ? retailPrice : wholesalePrice;
-            return (
-              <button
-                key={product.id}
-                onClick={() => addToCart(product)}
-                className="bg-white rounded-xl p-2.5 hover:shadow-md hover:border-[#E05D43] transition-all text-left border border-gray-200 flex flex-col active:scale-[0.96]"
-              >
-                <div className="w-full aspect-square bg-gray-50 rounded-lg mb-2 overflow-hidden">
-                  <img
-                    src={product.image || placeholderImage}
-                    alt={product.name}
-                    loading="lazy"
-                    className="w-full h-full object-contain p-1"
-                    style={!product.image ? { filter: "grayscale(100%)", opacity: 0.5 } : {}}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = placeholderImage;
-                      (e.target as HTMLImageElement).style.filter = "grayscale(100%)";
-                      (e.target as HTMLImageElement).style.opacity = "0.5";
-                    }}
-                  />
-                </div>
-                <h3 className="font-semibold text-xs text-gray-900 line-clamp-2 leading-tight mb-1 flex-1">
-                  {product.name}
-                </h3>
-                <div className="text-sm font-bold text-[#E05D43]">Rp {displayPrice.toLocaleString("id-ID")}</div>
-                <div className="text-[10px] text-gray-400 mt-0.5 truncate">{product.category}</div>
-              </button>
-            );
-          })}
-          {hasMore && (
-            <button
-              onClick={() => setDisplayLimit(displayLimit + MAX_PRODUCTS_TO_RENDER)}
-              className="bg-white rounded-xl p-2.5 border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50 transition-colors aspect-square"
-            >
-              <img src={placeholderImage} alt="Load More" className="w-10 h-10 object-contain mb-1" style={{ filter: "grayscale(100%)", opacity: 0.3 }} />
-              <span className="text-[10px] text-center">+{remainingProducts} lagi</span>
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-
-  // ─── RENDER ───────────────────────────────────────────────────────────────
 
   return (
     <div className="flex h-[100dvh] bg-white overflow-hidden">
 
       {/* ════ PRODUCT PANEL (always visible, full width on mobile) ════ */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <ProductHeader />
-        <ProductGrid />
+        {/* ── Header: category, price type, view toggle, search ── */}
+        <div className="flex-shrink-0 bg-white border-b border-gray-100 px-3 md:px-6 py-3">
+          <div className="flex items-center gap-2 mb-3">
+            <button
+              onClick={() => setShowCategoryMenu(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-[#E05D43] text-white rounded-lg hover:bg-[#C54D33] transition-all font-medium text-sm flex-shrink-0"
+            >
+              <Menu className="w-4 h-4" />
+              <span className="hidden sm:inline">Kategori</span>
+            </button>
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg flex-1 min-w-0">
+              <span className="text-xs text-gray-400 flex-shrink-0">Kategori:</span>
+              <span className="text-xs font-semibold text-gray-800 truncate">{selectedCategory}</span>
+            </div>
+            <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5 flex-shrink-0">
+              <button
+                onClick={() => setPriceType("retail")}
+                className={`px-2 py-1.5 rounded-md text-xs font-medium transition-all ${priceType === "retail" ? "bg-white text-[#E05D43] shadow-sm" : "text-gray-500"}`}
+              >
+                Eceran
+              </button>
+              <button
+                onClick={() => setPriceType("wholesale")}
+                className={`px-2 py-1.5 rounded-md text-xs font-medium transition-all ${priceType === "wholesale" ? "bg-white text-[#E05D43] shadow-sm" : "text-gray-500"}`}
+              >
+                Grosir
+              </button>
+            </div>
+            <div className="flex gap-0.5 bg-gray-100 rounded-lg p-0.5 flex-shrink-0">
+              <button onClick={() => setViewMode("list")} className={`p-1.5 rounded transition-all ${viewMode === "list" ? "bg-white text-[#E05D43] shadow-sm" : "text-gray-400"}`}>
+                <List className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={() => setViewMode("grid")} className={`p-1.5 rounded transition-all ${viewMode === "grid" ? "bg-white text-[#E05D43] shadow-sm" : "text-gray-400"}`}>
+                <Grid3x3 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+          {/* Search bar — inlined directly, never remounts */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Cari produk / scan barcode…"
+              className="w-full pl-9 pr-9 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E05D43] focus:border-transparent"
+              onKeyDown={handleBarcodeSearch}
+              autoComplete="off"
+            />
+            <Scan className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+          </div>
+          <div className="mt-1.5 text-[10px] text-gray-400 text-center">
+            {displayedProducts.length} dari {filteredProducts.length} produk
+          </div>
+        </div>
+
+        {/* ── Product list / grid ── */}
+        <div className="flex-1 overflow-y-auto px-3 md:px-6 py-3">
+          {viewMode === "list" ? (
+            <div className="space-y-1.5 pb-6">
+              {displayedProducts.map((product) => {
+                const displayPrice = priceType === "retail"
+                  ? (product.priceRetail || product.price_retail || 0)
+                  : (product.priceWholesale || product.price_wholesale || 0);
+                return (
+                  <button key={product.id} onClick={() => addToCart(product)}
+                    className="w-full bg-white rounded-xl px-3 py-2.5 hover:bg-orange-50 hover:border-[#E05D43] transition-all text-left border border-gray-200 active:scale-[0.98]"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0 pr-3">
+                        <h3 className="font-semibold text-sm text-gray-900 truncate">{product.name}</h3>
+                        <p className="text-xs text-gray-400 mt-0.5">{product.sku} · Stok: {product.stock}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-[#E05D43]">Rp {displayPrice.toLocaleString("id-ID")}</div>
+                        <div className="text-[10px] text-gray-400">{product.category}</div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+              {hasMore && (
+                <button onClick={() => setDisplayLimit(displayLimit + MAX_PRODUCTS_TO_RENDER)}
+                  className="w-full py-3 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:bg-gray-100 transition-colors"
+                >
+                  Tampilkan {remainingProducts} produk lagi…
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 pb-6">
+              {displayedProducts.map((product) => {
+                const displayPrice = priceType === "retail"
+                  ? (product.priceRetail || product.price_retail || 0)
+                  : (product.priceWholesale || product.price_wholesale || 0);
+                return (
+                  <button key={product.id} onClick={() => addToCart(product)}
+                    className="bg-white rounded-xl p-2.5 hover:shadow-md hover:border-[#E05D43] transition-all text-left border border-gray-200 flex flex-col active:scale-[0.96]"
+                  >
+                    <div className="w-full aspect-square bg-gray-50 rounded-lg mb-2 overflow-hidden">
+                      <img src={product.image || placeholderImage} alt={product.name} loading="lazy"
+                        className="w-full h-full object-contain p-1"
+                        style={!product.image ? { filter: "grayscale(100%)", opacity: 0.5 } : {}}
+                        onError={(e) => { const t = e.target as HTMLImageElement; t.src = placeholderImage; t.style.filter = "grayscale(100%)"; t.style.opacity = "0.5"; }}
+                      />
+                    </div>
+                    <h3 className="font-semibold text-xs text-gray-900 line-clamp-2 leading-tight mb-1 flex-1">{product.name}</h3>
+                    <div className="text-sm font-bold text-[#E05D43]">Rp {displayPrice.toLocaleString("id-ID")}</div>
+                    <div className="text-[10px] text-gray-400 mt-0.5 truncate">{product.category}</div>
+                  </button>
+                );
+              })}
+              {hasMore && (
+                <button onClick={() => setDisplayLimit(displayLimit + MAX_PRODUCTS_TO_RENDER)}
+                  className="bg-white rounded-xl p-2.5 border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50 transition-colors aspect-square"
+                >
+                  <img src={placeholderImage} alt="Load More" className="w-10 h-10 object-contain mb-1" style={{ filter: "grayscale(100%)", opacity: 0.3 }} />
+                  <span className="text-[10px] text-center">+{remainingProducts} lagi</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ════ DESKTOP CART SIDEBAR (hidden on mobile) ════ */}
       <div className="hidden md:flex w-96 bg-white border-l border-gray-200 flex-col overflow-hidden flex-shrink-0">
-        {/* Cart header */}
         <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Order Aktif</h2>
-            <div className="bg-[#E05D43] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">
-              {cartCount}
-            </div>
+            <div className="bg-[#E05D43] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">{cartCount}</div>
           </div>
-          {/* Price type */}
           <div className="flex gap-2">
-            <button
-              onClick={() => setPriceType("retail")}
-              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                priceType === "retail" ? "bg-[#E05D43] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Eceran
-            </button>
-            <button
-              onClick={() => setPriceType("wholesale")}
-              className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                priceType === "wholesale" ? "bg-[#E05D43] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Grosir
-            </button>
+            <button onClick={() => setPriceType("retail")} className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${priceType === "retail" ? "bg-[#E05D43] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>Eceran</button>
+            <button onClick={() => setPriceType("wholesale")} className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${priceType === "wholesale" ? "bg-[#E05D43] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>Grosir</button>
           </div>
         </div>
-
-        {/* Cart items */}
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
           {cart.length === 0 ? (
             <div className="text-center py-16">
@@ -429,17 +344,10 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
               <p className="text-gray-300 text-xs mt-1">Tap produk untuk menambahkan</p>
             </div>
           ) : (
-            <>
-              {cart.map((item) => <CartItemRow key={item.id} item={item} />)}
-              <div ref={cartEndRef} />
-            </>
+            <>{cart.map(renderCartItem)}<div ref={cartEndRef} /></>
           )}
         </div>
-
-        {/* Desktop order summary */}
-        {cart.length > 0 && (
-          <OrderSummary onPay={() => setShowCheckout(true)} />
-        )}
+        {cart.length > 0 && renderOrderSummary(() => setShowCheckout(true))}
       </div>
 
       {/* ════ MOBILE FLOATING CART BUTTON ════ */}
@@ -462,39 +370,24 @@ export function POSInterface({ products, settings, onSale }: POSInterfaceProps) 
       {/* ════ MOBILE CART SLIDE-UP SHEET ════ */}
       {showCartSheet && (
         <div className="md:hidden fixed inset-0 z-50">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setShowCartSheet(false)}
-          />
-          {/* Sheet */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowCartSheet(false)} />
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl flex flex-col max-h-[90dvh] shadow-2xl">
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 bg-gray-300 rounded-full" />
-            </div>
-            {/* Header */}
+            <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 bg-gray-300 rounded-full" /></div>
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
               <div>
                 <h2 className="text-lg font-bold text-gray-900">Keranjang</h2>
                 <p className="text-xs text-gray-400">{cartCount} item dipilih</p>
               </div>
-              <button
-                onClick={() => setShowCartSheet(false)}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-              >
+              <button onClick={() => setShowCartSheet(false)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
                 <X className="w-5 h-5 text-gray-600" />
               </button>
             </div>
-            {/* Cart items */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-              {cart.map((item) => <CartItemRow key={item.id} item={item} />)}
+              {cart.map(renderCartItem)}
               <div ref={cartEndRef} />
             </div>
-            {/* Order summary */}
-            <OrderSummary onPay={() => { setShowCartSheet(false); setShowCheckout(true); }} />
-            {/* Safe area padding for home indicator */}
-            <div className="h-safe-area-bottom bg-white" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} />
+            {renderOrderSummary(() => { setShowCartSheet(false); setShowCheckout(true); })}
+            <div style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} />
           </div>
         </div>
       )}
