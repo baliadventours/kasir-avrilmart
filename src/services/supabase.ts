@@ -60,7 +60,7 @@ export const productsAPI = {
   async getAll(): Promise<Product[]> {
     let allProducts: Product[] = [];
     let from = 0;
-    const batchSize = 150; // Set safe batch size below standard server-side limit (e.g. 200 max_rows)
+    const batchSize = 1000; // Request up to 1000 at a time (will auto-adapt if database Max Rows is lower)
     let hasMore = true;
 
     while (hasMore) {
@@ -77,12 +77,7 @@ export const productsAPI = {
 
       if (data && data.length > 0) {
         allProducts = [...allProducts, ...data];
-        from += data.length; // Always increment by actual loaded count to handle truncation
-        
-        // If we got less than batchSize, we've reached the end
-        if (data.length < batchSize) {
-          hasMore = false;
-        }
+        from += data.length; // Always increment by actual loaded count to handle any truncation
         
         // Log progress
         console.log(`Loaded ${allProducts.length} products...`);
@@ -93,6 +88,11 @@ export const productsAPI = {
 
     console.log(`✅ Total products loaded: ${allProducts.length}`);
     return allProducts;
+  },
+
+  // Alias for backward compatibility / cached service worker / custom POS calls
+  async getForPOS(): Promise<Product[]> {
+    return this.getAll();
   },
 
   // Get product by ID
