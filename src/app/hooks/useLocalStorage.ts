@@ -1,11 +1,40 @@
-import { useState, useEffect } from 'react';
 import { Product, Sale } from '../types';
 
 const PRODUCTS_KEY = 'local_products';
 const SALES_KEY = 'local_sales';
+const USER_KEY = 'local_user';
 
 export function useLocalStorage() {
-  // Save products to localStorage
+  // ─── User cache (for offline session restore) ────────────────────────────
+
+  const saveUser = (user: { id: string; email: string; name: string; role: string }) => {
+    try {
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+    } catch (error) {
+      console.error('Error saving user to localStorage:', error);
+    }
+  };
+
+  const loadUser = (): { id: string; email: string; name: string; role: 'admin' | 'cashier' } | null => {
+    try {
+      const stored = localStorage.getItem(USER_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      console.error('Error loading user from localStorage:', error);
+      return null;
+    }
+  };
+
+  const clearUser = () => {
+    try {
+      localStorage.removeItem(USER_KEY);
+    } catch (error) {
+      console.error('Error clearing user from localStorage:', error);
+    }
+  };
+
+  // ─── Products ─────────────────────────────────────────────────────────────
+
   const saveProducts = (products: Product[]) => {
     try {
       localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
@@ -15,7 +44,6 @@ export function useLocalStorage() {
     }
   };
 
-  // Load products from localStorage
   const loadProducts = (): Product[] | null => {
     try {
       const stored = localStorage.getItem(PRODUCTS_KEY);
@@ -26,7 +54,8 @@ export function useLocalStorage() {
     }
   };
 
-  // Save sales to localStorage
+  // ─── Sales ────────────────────────────────────────────────────────────────
+
   const saveSales = (sales: Sale[]) => {
     try {
       localStorage.setItem(SALES_KEY, JSON.stringify(sales));
@@ -36,7 +65,6 @@ export function useLocalStorage() {
     }
   };
 
-  // Load sales from localStorage
   const loadSales = (): Sale[] | null => {
     try {
       const stored = localStorage.getItem(SALES_KEY);
@@ -47,37 +75,34 @@ export function useLocalStorage() {
     }
   };
 
-  // Update single product in localStorage
   const updateProductInStorage = (productId: string, updates: Partial<Product>) => {
     const products = loadProducts();
     if (products) {
-      const updated = products.map(p => 
+      const updated = products.map(p =>
         p.id === productId ? { ...p, ...updates } : p
       );
       saveProducts(updated);
     }
   };
 
-  // Add sale to localStorage
   const addSaleToStorage = (sale: Sale) => {
     const sales = loadSales() || [];
     sales.unshift(sale);
     saveSales(sales);
   };
 
-  // Clear all local data
   const clearLocalData = () => {
     try {
       localStorage.removeItem(PRODUCTS_KEY);
       localStorage.removeItem(`${PRODUCTS_KEY}_timestamp`);
       localStorage.removeItem(SALES_KEY);
       localStorage.removeItem(`${SALES_KEY}_timestamp`);
+      // Note: clearUser() is called separately on logout
     } catch (error) {
       console.error('Error clearing local data:', error);
     }
   };
 
-  // Get last sync timestamp
   const getLastSync = (type: 'products' | 'sales'): number | null => {
     try {
       const key = type === 'products' ? PRODUCTS_KEY : SALES_KEY;
@@ -89,6 +114,9 @@ export function useLocalStorage() {
   };
 
   return {
+    saveUser,
+    loadUser,
+    clearUser,
     saveProducts,
     loadProducts,
     saveSales,

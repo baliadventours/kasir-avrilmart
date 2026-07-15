@@ -91,24 +91,36 @@ export default function App() {
     try {
       const session = await authAPI.getSession();
 
-      if (session) {
-        const user = await authAPI.getUser();
-        if (user) {
-          setAccessToken(session.access_token);
-          setUser({
-            id: user.id,
-            email: user.email || "",
-            name: user.user_metadata?.name || "",
-            role: user.user_metadata?.role || "cashier",
-          });
-        }
+      if (session?.user) {
+        // ✅ Use session.user directly — no extra network call needed.
+        // Supabase stores the session in localStorage, so this works offline too.
+        const u = session.user;
+        const userData = {
+          id: u.id,
+          email: u.email || "",
+          name: u.user_metadata?.name || "",
+          role: (u.user_metadata?.role || "cashier") as "admin" | "cashier",
+        };
+        setAccessToken(session.access_token);
+        setUser(userData);
+        localStorage.saveUser(userData); // Keep cache fresh
+        setIsCheckingSession(false);
+        return;
       }
     } catch (error) {
-      console.error("Session check error:", error);
-    } finally {
-      setIsCheckingSession(false);
+      console.warn("Session check failed (possibly offline):", error);
     }
+
+    // 🔌 Offline fallback: restore user from localStorage cache
+    const cachedUser = localStorage.loadUser();
+    if (cachedUser) {
+      console.log("📦 Restoring session from local cache (offline mode)");
+      setUser(cachedUser);
+    }
+
+    setIsCheckingSession(false);
   };
+
 
   const handleLogin = async (email: string, password: string) => {
     setLoginLoading(true);
@@ -117,13 +129,15 @@ export default function App() {
       const { session, user: authUser } = await authAPI.signIn(email, password);
 
       if (session && authUser) {
-        setAccessToken(session.access_token);
-        setUser({
+        const userData = {
           id: authUser.id,
           email: authUser.email || "",
           name: authUser.user_metadata?.name || "",
-          role: authUser.user_metadata?.role || "cashier",
-        });
+          role: (authUser.user_metadata?.role || "cashier") as "admin" | "cashier",
+        };
+        setAccessToken(session.access_token);
+        setUser(userData);
+        localStorage.saveUser(userData); // 💾 Persist for offline restarts
         setActiveMenu("pos");
       }
     } catch (error: any) {
@@ -137,13 +151,17 @@ export default function App() {
   const handleLogout = async () => {
     try {
       await authAPI.signOut();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      // Always clear local state and cache on explicit logout
+      localStorage.clearUser();
+      localStorage.clearLocalData();
       setUser(null);
       setAccessToken(null);
       setProducts([]);
       setSales([]);
       setActiveMenu("pos");
-    } catch (error) {
-      console.error("Logout error:", error);
     }
   };
 
