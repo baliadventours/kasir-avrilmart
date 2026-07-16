@@ -17,7 +17,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ activeMenu, onMenuChange, 
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 md:hidden z-40 bg-white/95 backdrop-blur border-t border-gray-200 flex items-stretch"
+      className="fixed inset-x-0 bottom-0 md:hidden z-40 bg-white/90 backdrop-blur-lg border-t border-gray-200 flex items-stretch"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {tabs.map((tab) => {
@@ -27,14 +27,15 @@ export const MobileNav: React.FC<MobileNavProps> = ({ activeMenu, onMenuChange, 
           <button
             key={tab.id}
             onClick={() => onMenuChange(tab.id)}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 transition-colors ${
-              isActive ? "text-[#E05D43]" : "text-gray-400 hover:text-gray-600"
+            aria-label={tab.label}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-3 transition-colors ${
+              isActive ? "text-[#E05D43]" : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            <Icon className={`w-5 h-5 transition-transform ${isActive ? "scale-110" : ""}`} />
-            <span className="text-[10px] font-medium">{tab.label}</span>
+            <Icon className={`w-6 h-6 transition-transform ${isActive ? "scale-110" : ""}`} />
+            <span className="text-[11px] font-medium">{tab.label}</span>
             {isActive && (
-              <span className="absolute bottom-0 w-8 h-0.5 bg-[#E05D43] rounded-full" />
+              <span className="absolute -bottom-1 w-8 h-0.5 bg-[#E05D43] rounded-full" />
             )}
           </button>
         );
@@ -43,10 +44,11 @@ export const MobileNav: React.FC<MobileNavProps> = ({ activeMenu, onMenuChange, 
       {/* More / Hamburger */}
       <button
         onClick={onOpenDrawer}
-        className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-gray-400 hover:text-gray-600 transition-colors"
+        aria-label="More menu"
+        className="flex-1 flex flex-col items-center justify-center gap-0.5 py-3 text-gray-500 hover:text-gray-700 transition-colors"
       >
-        <MoreHorizontal className="w-5 h-5" />
-        <span className="text-[10px] font-medium">Menu</span>
+        <MoreHorizontal className="w-6 h-6" />
+        <span className="text-[11px] font-medium">Menu</span>
       </button>
     </nav>
   );

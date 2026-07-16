@@ -9,8 +9,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error("Missing Supabase environment variables!");
 }
 
-// Create Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create Supabase client — autoRefreshToken disabled so offline startup never
+// triggers a network fetch just to check the session. Tokens still refresh
+// automatically when the user makes an actual API call while online.
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,       // Keep session in localStorage (survives restart)
+    autoRefreshToken: false,    // Don't auto-refresh on startup (needs network)
+    detectSessionInUrl: false,  // Not using OAuth redirects
+  },
+});
+
 
 // Database Types
 export interface Product {
